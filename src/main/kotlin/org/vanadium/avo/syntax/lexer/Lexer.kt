@@ -9,6 +9,7 @@ fun Char.isIdentifierChar(): Boolean {
 class Lexer(val input: String) {
 
     private var position = 0
+    private var line = 1
 
     private fun peek(): Char? {
         return input.getOrNull(position)
@@ -26,7 +27,13 @@ class Lexer(val input: String) {
     }
 
     private fun skipSpaces() {
-        while (!isEof() && peek()!!.isWhitespace()) {
+        while (!isEof()) {
+            val c = peek()!!
+            if (!c.isWhitespace())
+                break
+            if (c == '\n') {
+                line++
+            }
             advance()
         }
     }
@@ -83,6 +90,6 @@ class Lexer(val input: String) {
         }
 
         return if (token.isEmpty()) Token.eof()
-        else Token(token.toString(), type).typeAdjusted()
+        else Token(token.toString(), type, line).typeAdjusted()
     }
 }

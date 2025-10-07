@@ -1,11 +1,1 @@
-var color = rgb(0, 0, 0)
-background(color)
-
-var theta = 0
-var radius = 100
-
-while theta < pi {
-    theta = theta + 1
-    var x = cos(theta) * radius
-    var y = sin(theta) * radius
-}
+var b = 123 + var a = 123.213

@@ -122,23 +122,28 @@ enum class TokenType {
     GREATER_THAN,
 
     @CharacterToken('.')
-    DOT
+    DOT;
+
+    fun isAdditiveOperation() = (this == PLUS || this == MINUS)
+
+    fun isMultiplicativeOperation() = (this == ASTERISK || this == SLASH)
+
 }
 
-data class Token(val value: String, val type: TokenType) {
+data class Token(val value: String, val type: TokenType, val line: Int) {
     companion object {
-        fun eof(): Token = Token("", TokenType.EOF)
+        fun eof(): Token = Token("", TokenType.EOF, 0)
     }
 
     /**
      * Creates a new token that may include a keyword or character type
      */
     fun typeAdjusted(): Token {
-        return Token(this.value, this.value.findTokenType() ?: type)
+        return Token(this.value, this.value.findTokenType() ?: type, this.line)
     }
 
     override fun toString(): String {
-        return "Token ( '$value' | $type )"
+        return "Token ( '$value' | $type | Line $line )"
     }
 
 
