@@ -47,6 +47,8 @@ enum class TokenType {
     EOF,
     UNDEFINED,
 
+    GENERIC_SYMBOL,
+
     IDENTIFIER,
 
     INTEGER_LITERAL,
@@ -111,7 +113,16 @@ enum class TokenType {
     SLASH,
 
     @CharacterToken('*')
-    ASTERISK
+    ASTERISK,
+
+    @CharacterToken('<')
+    LESS_THAN,
+
+    @CharacterToken('>')
+    GREATER_THAN,
+
+    @CharacterToken('.')
+    DOT
 }
 
 data class Token(val value: String, val type: TokenType) {

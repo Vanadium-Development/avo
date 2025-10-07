@@ -36,6 +36,13 @@ class Lexer(val input: String) {
         return !isEof()
     }
 
+    private fun Char.classify(currentType: TokenType): TokenType = when {
+        isWhitespace() -> TokenType.UNDEFINED
+        isDigit() -> if (currentType == TokenType.FLOAT_LITERAL) TokenType.FLOAT_LITERAL else TokenType.INTEGER_LITERAL
+        isIdentifierChar() -> TokenType.IDENTIFIER
+        else -> TokenType.GENERIC_SYMBOL
+    }
+
     fun nextToken(): Token {
         skipSpaces()
         if (isEof()) {
@@ -45,7 +52,7 @@ class Lexer(val input: String) {
         var type = TokenType.UNDEFINED
         val token = StringBuilder()
 
-        while (position < input.length) {
+        while (!isEof()) {
             val c = peek()!!
 
             if (c.isWhitespace()) {
@@ -53,51 +60,29 @@ class Lexer(val input: String) {
                 break
             }
 
-            if (c == '.') {
-                if (type == TokenType.INTEGER_LITERAL) {
-                    type = TokenType.FLOAT_LITERAL
-                    token.append(c)
-                    advance()
-                    continue
-                } else if (type == TokenType.FLOAT_LITERAL) {
-                    throw LexerException("Invalid float literal: \"${token}$c\"")
-                }
-            }
-
-            if (c.isIdentifierChar()) {
-                if (type != TokenType.UNDEFINED && type != TokenType.IDENTIFIER) {
-                    return Token(token.toString(), type).typeAdjusted()
-                }
-                type = TokenType.IDENTIFIER
+            if (c == '.' && type == TokenType.INTEGER_LITERAL) {
+                type = TokenType.FLOAT_LITERAL
                 token.append(c)
                 advance()
                 continue
             }
 
-            if (c.isDigit()) {
-                if (type != TokenType.UNDEFINED && type != TokenType.INTEGER_LITERAL && type != TokenType.FLOAT_LITERAL) {
-                    return Token(token.toString(), type).typeAdjusted()
-                }
-                type = TokenType.INTEGER_LITERAL
-                token.append(c)
-                advance()
-                continue
+            var nextType = c.classify(type)
+            val isSymbol = nextType == TokenType.GENERIC_SYMBOL
+            if (isSymbol) {
+                nextType = c.toString().findTokenType() ?: throw LexerException("Unknown symbol: $c")
             }
-
-            if (type != TokenType.UNDEFINED && token.isNotEmpty()) {
-                return Token(token.toString(), type).typeAdjusted()
-            }
-
-            advance()
+            if (type == TokenType.UNDEFINED) type = nextType
+            else if (nextType != type) break
 
             token.append(c)
-            return Token(token.toString(), type).typeAdjusted()
+            advance()
+
+            if (isSymbol)
+                break
         }
 
-        if (type != TokenType.UNDEFINED && token.isNotEmpty()) {
-            return Token(token.toString(), type).typeAdjusted()
-        }
-
-        return Token.eof()
+        return if (token.isEmpty()) Token.eof()
+        else Token(token.toString(), type).typeAdjusted()
     }
 }
