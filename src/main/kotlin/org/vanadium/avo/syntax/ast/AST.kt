@@ -6,6 +6,8 @@ open class Node
 
 open class ExpressionNode : Node()
 
+open class StatementNode : Node()
+
 data class ProgramNode(val nodes: List<Node>) : Node()
 
 sealed class LiteralNode : ExpressionNode() {
@@ -19,4 +21,28 @@ data class BinaryOperationNode(val left: ExpressionNode, val right: ExpressionNo
 
 data class UnaryOperationNode(val expression: ExpressionNode, val operation: UnaryOperationType) : ExpressionNode()
 
+data class BlockExpressionNode(val nodes: List<Node>, val parent: BlockExpressionNode?)
+
+data class ConditionalExpressionNode(
+    val branches: List<ConditionalExpressionBranch>,
+    val defaultBranch: BlockExpressionNode?
+) : ExpressionNode() {
+    data class ConditionalExpressionBranch(
+        val condition: ExpressionNode,
+        val block: BlockExpressionNode
+    )
+
+    data class ConditionalExpressionCollection(
+        val branches: MutableList<ConditionalExpressionBranch>,
+        var defaultBranch: BlockExpressionNode?
+    )
+}
+
 data class VariableDeclarationNode(val name: Token, val value: ExpressionNode?) : ExpressionNode()
+
+data class ReturnStatementNode(val expression: ExpressionNode) : StatementNode()
+
+class ContinueStatementNode : StatementNode()
+
+class BreakStatementNode : StatementNode()
+

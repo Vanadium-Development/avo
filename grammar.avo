@@ -1,1 +1,12 @@
-var b = 123 + var a = 123.213
+var b = 123 + (if 1 {
+        123
+    } else {
+        321
+    }
+)
+
+if 1 {
+    continue
+    break
+    return 1 + 2
+}

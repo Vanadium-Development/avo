@@ -64,8 +64,26 @@ enum class TokenType {
     @KeywordToken("if")
     KW_IF,
 
-    @KeywordToken("fn")
-    KW_FN,
+    @KeywordToken("else")
+    KW_ELSE,
+
+    @KeywordToken("fun")
+    KW_FUN,
+
+    @KeywordToken("true")
+    KW_TRUE,
+
+    @KeywordToken("false")
+    KW_FALSE,
+
+    @KeywordToken("return")
+    KW_RETURN,
+
+    @KeywordToken("continue")
+    KW_CONTINUE,
+
+    @KeywordToken("break")
+    KW_BREAK,
 
     @CharacterToken('(')
     LPAREN,
@@ -146,5 +164,6 @@ data class Token(val value: String, val type: TokenType, val line: Int) {
         return "Token ( '$value' | $type | Line $line )"
     }
 
+    fun isEof() = this.type == TokenType.EOF
 
 }
