@@ -1,6 +1,7 @@
 package org.vanadium.avo.syntax.ast
 
 import org.vanadium.avo.syntax.lexer.Token
+import org.vanadium.avo.types.DataType
 
 open class Node
 
@@ -14,6 +15,7 @@ sealed class LiteralNode : ExpressionNode() {
     data class IntegerLiteral(val value: Int) : LiteralNode()
     data class FloatLiteral(val value: Double) : LiteralNode()
     data class StringLiteral(val value: String) : LiteralNode()
+    data class BooleanLiteral(val value: Boolean) : LiteralNode()
 }
 
 data class BinaryOperationNode(val left: ExpressionNode, val right: ExpressionNode, val type: BinaryOperationType) :
@@ -38,7 +40,12 @@ data class ConditionalExpressionNode(
     )
 }
 
-data class VariableDeclarationNode(val name: Token, val value: ExpressionNode?) : ExpressionNode()
+data class FunctionDefinitionNode(val identifier: Token, val parameters: List<FunctionParameter>, val returnType: DataType) : ExpressionNode() {
+    data class FunctionParameter(val identifier: Token, val type: DataType)
+}
+
+data class VariableDeclarationNode(val identifier: Token, val type: DataType, val value: ExpressionNode?) :
+    ExpressionNode()
 
 data class ReturnStatementNode(val expression: ExpressionNode) : StatementNode()
 

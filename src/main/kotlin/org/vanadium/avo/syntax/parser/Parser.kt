@@ -5,7 +5,9 @@ import org.vanadium.avo.syntax.ast.*
 import org.vanadium.avo.syntax.lexer.Lexer
 import org.vanadium.avo.syntax.lexer.TokenStream
 import org.vanadium.avo.syntax.lexer.TokenType
+import org.vanadium.avo.types.DataType
 import java.util.*
+import javax.swing.plaf.synth.SynthTextAreaUI
 
 class Parser(lexer: Lexer) {
 
@@ -18,6 +20,25 @@ class Parser(lexer: Lexer) {
             nodes.add(parseExpression())
         }
         return ProgramNode(nodes)
+    }
+
+    private fun parseDataType(): DataType {
+        val type = when (tokenStream.currentToken.type) {
+            TokenType.KW_INT -> DataType.IntegerType
+            TokenType.KW_FLOAT -> DataType.FloatType
+            TokenType.KW_STRING -> DataType.StringType
+            TokenType.KW_BOOL -> DataType.BooleanType
+            TokenType.KW_VOID -> DataType.VoidType
+            TokenType.QUESTION_MARK -> DataType.InferredType
+            TokenType.IDENTIFIER -> DataType.ComplexType(tokenStream.currentToken.value)
+            else -> throw SyntaxException(
+                "Invalid data type ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+        }
+
+        tokenStream.consume()
+
+        return type
     }
 
     private fun parseStatement(): StatementNode? = when (tokenStream.currentToken.type) {
@@ -115,6 +136,8 @@ class Parser(lexer: Lexer) {
             TokenType.FLOAT_LITERAL -> LiteralNode.FloatLiteral(tokenStream.currentToken.value.toDouble())
             TokenType.INTEGER_LITERAL -> LiteralNode.IntegerLiteral(tokenStream.currentToken.value.toInt())
             TokenType.STRING_LITERAL -> LiteralNode.StringLiteral(tokenStream.currentToken.value)
+            TokenType.KW_TRUE -> LiteralNode.BooleanLiteral(true)
+            TokenType.KW_FALSE -> LiteralNode.BooleanLiteral(false)
             else -> null
         }
 
@@ -126,6 +149,7 @@ class Parser(lexer: Lexer) {
         literal = when (tokenStream.currentToken.type) {
             TokenType.KW_VAR -> parseVariableDeclaration()
             TokenType.KW_IF -> parseConditionalExpression()
+            TokenType.KW_FUN -> parseFunctionDefinition()
             else -> throw SyntaxException(
                 "Expected a factor, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
             )
@@ -151,6 +175,15 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
+        if (tokenStream.currentToken.type != TokenType.COLON)
+            throw SyntaxException(
+                "Expected ':', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
+
+        val type = parseDataType()
+
         if (tokenStream.currentToken.type != TokenType.EQUALS)
             throw SyntaxException(
                 "Expected '=', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
@@ -158,7 +191,7 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        return VariableDeclarationNode(id, parseExpression())
+        return VariableDeclarationNode(id, type, parseExpression())
     }
 
     private fun parseBlockExpression(): BlockExpressionNode {
@@ -241,4 +274,75 @@ class Parser(lexer: Lexer) {
         )
         return ConditionalExpressionNode(collection.branches, collection.defaultBranch)
     }
+
+    private fun parseFunctionDefinition(): FunctionDefinitionNode {
+        if (tokenStream.currentToken.type != TokenType.KW_FUN)
+            throw SyntaxException(
+                "Expected 'fun', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        val line = tokenStream.currentToken.line
+
+        tokenStream.consume()
+
+        val identifier = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        var parameters = mutableListOf<FunctionDefinitionNode.FunctionParameter>()
+        var returnType: DataType = DataType.VoidType
+
+        // Parse function signature
+        if (tokenStream.currentToken.type == TokenType.LPAREN) {
+            tokenStream.consume()
+
+            while (tokenStream.currentToken.type != TokenType.RPAREN && !tokenStream.currentToken.isEof()) {
+                if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+                    throw SyntaxException(
+                        "Expected parameter identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+                    )
+
+                val paramIdentifier = tokenStream.currentToken
+
+                tokenStream.consume()
+
+                if (tokenStream.currentToken.type != TokenType.COLON)
+                    throw SyntaxException(
+                        "Expected ':', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+                    )
+
+                tokenStream.consume()
+
+                val paramType = parseDataType()
+
+                parameters.add(FunctionDefinitionNode.FunctionParameter(paramIdentifier, paramType))
+
+                if (tokenStream.currentToken.type == TokenType.COMMA) {
+                    if (tokenStream.nextToken.type == TokenType.RPAREN)
+                        throw SyntaxException(
+                            "Expected more parameters after ',', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+                        )
+                    break
+                }
+            }
+
+            if (tokenStream.currentToken.type != TokenType.RPAREN)
+                throw SyntaxException(
+                    "Reached end of file while parsing signature of function '${identifier.value}' starting on line $line"
+                )
+
+            tokenStream.consume()
+        }
+
+        // Parse return type
+        if (tokenStream.currentToken.type == TokenType.KW_RETURNS) {
+            tokenStream.consume()
+            returnType = parseDataType()
+        }
+
+        val block = parseBlockExpression()
+
+        return FunctionDefinitionNode(identifier, parameters, returnType)
+    }
+
 }

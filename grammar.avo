@@ -1,4 +1,8 @@
-var b = 123 + (if 1 {
+fun a(name: string) returns int {
+    return 1
+}
+
+var b: bool = 123 + (if true {
         123
     } else {
         321

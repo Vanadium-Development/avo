@@ -85,6 +85,24 @@ enum class TokenType {
     @KeywordToken("break")
     KW_BREAK,
 
+    @KeywordToken("int")
+    KW_INT,
+
+    @KeywordToken("float")
+    KW_FLOAT,
+
+    @KeywordToken("string")
+    KW_STRING,
+
+    @KeywordToken("bool")
+    KW_BOOL,
+
+    @KeywordToken("void")
+    KW_VOID,
+
+    @KeywordToken("returns")
+    KW_RETURNS,
+
     @CharacterToken('(')
     LPAREN,
 
@@ -140,7 +158,10 @@ enum class TokenType {
     GREATER_THAN,
 
     @CharacterToken('.')
-    DOT;
+    DOT,
+
+    @CharacterToken('?')
+    QUESTION_MARK;
 
     fun isAdditiveOperation() = (this == PLUS || this == MINUS)
 
