@@ -2,6 +2,7 @@ package org.vanadium.avo.syntax.ast
 
 import org.vanadium.avo.syntax.lexer.Token
 import org.vanadium.avo.types.DataType
+import java.beans.Expression
 
 open class Node
 
@@ -40,12 +41,18 @@ data class ConditionalExpressionNode(
     )
 }
 
-data class FunctionDefinitionNode(val identifier: Token, val parameters: List<FunctionParameter>, val returnType: DataType) : ExpressionNode() {
-    data class FunctionParameter(val identifier: Token, val type: DataType)
+data class FunctionDefinitionNode(val identifier: Token, val parameters: List<FunctionSignatureParameter>, val returnType: DataType, val block: BlockExpressionNode) : ExpressionNode() {
+    data class FunctionSignatureParameter(val identifier: Token, val type: DataType)
+}
+
+data class FunctionCallNode(val identifier: Token, val parameters: List<FunctionCallParameter>): ExpressionNode() {
+    data class FunctionCallParameter(val expression: ExpressionNode)
 }
 
 data class VariableDeclarationNode(val identifier: Token, val type: DataType, val value: ExpressionNode?) :
     ExpressionNode()
+
+data class VariableReferenceNode(val identifier: Token) : ExpressionNode()
 
 data class ReturnStatementNode(val expression: ExpressionNode) : StatementNode()
 

@@ -7,7 +7,6 @@ import org.vanadium.avo.syntax.lexer.TokenStream
 import org.vanadium.avo.syntax.lexer.TokenType
 import org.vanadium.avo.types.DataType
 import java.util.*
-import javax.swing.plaf.synth.SynthTextAreaUI
 
 class Parser(lexer: Lexer) {
 
@@ -150,12 +149,23 @@ class Parser(lexer: Lexer) {
             TokenType.KW_VAR -> parseVariableDeclaration()
             TokenType.KW_IF -> parseConditionalExpression()
             TokenType.KW_FUN -> parseFunctionDefinition()
-            else -> throw SyntaxException(
-                "Expected a factor, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
-            )
+            else -> null
         }
 
-        return literal
+        if (literal != null) {
+            return literal
+        }
+
+        if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
+            if (tokenStream.nextToken.type == TokenType.LPAREN)
+                return parseFunctionCall()
+            else
+                return parseVariableReference()
+        }
+
+        throw SyntaxException(
+            "Expected a factor, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+        )
     }
 
     private fun parseVariableDeclaration(): VariableDeclarationNode {
@@ -192,6 +202,19 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return VariableDeclarationNode(id, type, parseExpression())
+    }
+
+    private fun parseVariableReference(): VariableReferenceNode {
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw SyntaxException(
+                "Expected identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        val id = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        return VariableReferenceNode(id)
     }
 
     private fun parseBlockExpression(): BlockExpressionNode {
@@ -289,7 +312,7 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        var parameters = mutableListOf<FunctionDefinitionNode.FunctionParameter>()
+        var parameters = mutableListOf<FunctionDefinitionNode.FunctionSignatureParameter>()
         var returnType: DataType = DataType.VoidType
 
         // Parse function signature
@@ -315,14 +338,14 @@ class Parser(lexer: Lexer) {
 
                 val paramType = parseDataType()
 
-                parameters.add(FunctionDefinitionNode.FunctionParameter(paramIdentifier, paramType))
+                parameters.add(FunctionDefinitionNode.FunctionSignatureParameter(paramIdentifier, paramType))
 
                 if (tokenStream.currentToken.type == TokenType.COMMA) {
                     if (tokenStream.nextToken.type == TokenType.RPAREN)
                         throw SyntaxException(
                             "Expected more parameters after ',', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
                         )
-                    break
+                    continue
                 }
             }
 
@@ -342,7 +365,51 @@ class Parser(lexer: Lexer) {
 
         val block = parseBlockExpression()
 
-        return FunctionDefinitionNode(identifier, parameters, returnType)
+        return FunctionDefinitionNode(identifier, parameters, returnType, block)
+    }
+
+    private fun parseFunctionCall(): FunctionCallNode {
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw SyntaxException(
+                "Expected function identifier, got ${tokenStream.currentToken.type} Error on line ${tokenStream.currentToken.line}"
+            )
+
+        val id = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        if (tokenStream.currentToken.type != TokenType.LPAREN)
+            throw SyntaxException(
+                "Expected '(', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
+
+        val parameters = mutableListOf<FunctionCallNode.FunctionCallParameter>()
+
+        while (tokenStream.currentToken.type != TokenType.RPAREN && !tokenStream.currentToken.isEof()) {
+            val expr = parseExpression()
+
+            parameters.add(FunctionCallNode.FunctionCallParameter(expr))
+
+            if (tokenStream.currentToken.type == TokenType.COMMA) {
+                if (tokenStream.nextToken.type == TokenType.RPAREN)
+                    throw SyntaxException(
+                        "Expected more parameters after ',', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+                    )
+
+                continue
+            }
+        }
+
+        if (tokenStream.currentToken.type != TokenType.RPAREN)
+            throw SyntaxException(
+                "Expected ')' after parameter list, got ${tokenStream.currentToken.type} Error on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
+
+        return FunctionCallNode(id, parameters)
     }
 
 }

@@ -1,16 +1,7 @@
-fun a(name: string) returns int {
-    return 1
+fun sayHello(to: string) {
+    print("Hello, " + to + "!")
 }
 
-var b: bool = 123 + (if true {
-        123
-    } else {
-        321
-    }
-)
-
-if 1 {
-    continue
-    break
-    return 1 + 2
+fun main {
+    sayHello("Szeban")
 }

@@ -58,9 +58,26 @@ class Lexer(val input: String) {
 
         var type = TokenType.UNDEFINED
         val token = StringBuilder()
+        var isString = false
 
         while (!isEof()) {
             val c = peek()!!
+
+            if (c == '"') {
+                isString = !isString
+                type = TokenType.STRING_LITERAL
+                advance()
+                if (!isString) {
+                    break
+                }
+                continue
+            }
+
+            if (isString) {
+                token.append(c)
+                advance()
+                continue
+            }
 
             if (c.isWhitespace()) {
                 skipSpaces()
