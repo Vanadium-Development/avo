@@ -1,1 +1,2 @@
-(2 + 2) * 2
+var a: (int) | int = fun test (a: int) returns int {
+}

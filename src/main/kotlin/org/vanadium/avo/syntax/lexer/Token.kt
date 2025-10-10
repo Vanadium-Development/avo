@@ -160,12 +160,21 @@ enum class TokenType {
     @CharacterToken('.')
     DOT,
 
+    @CharacterToken('^')
+    CARET,
+
     @CharacterToken('?')
-    QUESTION_MARK;
+    QUESTION_MARK,
+
+    @CharacterToken('%')
+    PERCENT,
+
+    @CharacterToken('|')
+    VBAR;
 
     fun isAdditiveOperation() = (this == PLUS || this == MINUS)
 
-    fun isMultiplicativeOperation() = (this == ASTERISK || this == SLASH)
+    fun isMultiplicativeOperation() = (this == ASTERISK || this == SLASH || this == CARET || this == PERCENT)
 
 }
 
@@ -178,7 +187,11 @@ data class Token(val value: String, val type: TokenType, val line: Int) {
      * Creates a new token that may include a keyword or character type
      */
     fun typeAdjusted(): Token {
-        return Token(this.value, this.value.findTokenType() ?: type, this.line)
+        return Token(
+            this.value,
+            if (this.type == TokenType.GENERIC_SYMBOL || this.type == TokenType.IDENTIFIER) (this.value.findTokenType() ?: type) else type,
+            this.line
+        )
     }
 
     override fun toString(): String {

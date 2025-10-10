@@ -16,6 +16,8 @@ enum class BinaryOperationType {
             TokenType.MINUS -> MINUS
             TokenType.ASTERISK -> MULTIPLY
             TokenType.SLASH -> DIVIDE
+            TokenType.PERCENT -> MODULUS
+            TokenType.CARET -> POWER
             else -> null
         }
     }

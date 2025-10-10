@@ -3,7 +3,6 @@ package org.vanadium.avo.syntax.ast
 import org.vanadium.avo.runtime.RuntimeValue
 import org.vanadium.avo.syntax.lexer.Token
 import org.vanadium.avo.types.DataType
-import java.beans.Expression
 
 open class Node
 
@@ -21,16 +20,19 @@ sealed class LiteralNode : ExpressionNode() {
             return RuntimeValue.IntegerValue(value)
         }
     }
+
     data class FloatLiteral(val value: Double) : LiteralNode() {
         override fun runtimeValue(): RuntimeValue {
             return RuntimeValue.FloatValue(value)
         }
     }
+
     data class StringLiteral(val value: String) : LiteralNode() {
         override fun runtimeValue(): RuntimeValue {
             return RuntimeValue.StringValue(value)
         }
     }
+
     data class BooleanLiteral(val value: Boolean) : LiteralNode() {
         override fun runtimeValue(): RuntimeValue {
             return RuntimeValue.BooleanValue(value)
@@ -60,16 +62,23 @@ data class ConditionalExpressionNode(
     )
 }
 
-data class FunctionDefinitionNode(val identifier: Token, val parameters: List<FunctionSignatureParameter>, val returnType: DataType, val block: BlockExpressionNode) : ExpressionNode() {
+data class FunctionDefinitionNode(
+    val identifier: Token,
+    val parameters: List<FunctionSignatureParameter>,
+    val returnType: DataType,
+    val block: BlockExpressionNode
+) : ExpressionNode() {
     data class FunctionSignatureParameter(val identifier: Token, val type: DataType)
 }
 
-data class FunctionCallNode(val identifier: Token, val parameters: List<FunctionCallParameter>): ExpressionNode() {
+data class FunctionCallNode(val identifier: Token, val parameters: List<FunctionCallParameter>) : ExpressionNode() {
     data class FunctionCallParameter(val expression: ExpressionNode)
 }
 
-data class VariableDeclarationNode(val identifier: Token, val type: DataType, val value: ExpressionNode?) :
+data class VariableDeclarationNode(val identifier: Token, var type: DataType, val value: ExpressionNode?) :
     ExpressionNode()
+
+data class VariableAssignmentNode(val identifier: Token, val value: ExpressionNode) : ExpressionNode()
 
 data class VariableReferenceNode(val identifier: Token) : ExpressionNode()
 

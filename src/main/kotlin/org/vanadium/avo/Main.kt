@@ -16,6 +16,9 @@ fun main() {
     val ast = parser.parse()
     val interpreter = Interpreter(Scope(null))
     println(Gson().newBuilder().setPrettyPrinting().create().toJson(ast))
-    println("==> ${interpreter.eval(ast.nodes.get(0) as ExpressionNode)}")
+
+    ast.nodes.forEach {
+        println("--> ${interpreter.eval(it as ExpressionNode)}")
+    }
 
 }
