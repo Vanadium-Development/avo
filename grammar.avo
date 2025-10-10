@@ -1,7 +1,1 @@
-fun sayHello(to: string) {
-    print("Hello, " + to + "!")
-}
-
-fun main {
-    sayHello("Szeban")
-}
+(2 + 2) * 2

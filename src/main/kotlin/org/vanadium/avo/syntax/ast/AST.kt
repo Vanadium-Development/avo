@@ -1,5 +1,6 @@
 package org.vanadium.avo.syntax.ast
 
+import org.vanadium.avo.runtime.RuntimeValue
 import org.vanadium.avo.syntax.lexer.Token
 import org.vanadium.avo.types.DataType
 import java.beans.Expression
@@ -13,10 +14,28 @@ open class StatementNode : Node()
 data class ProgramNode(val nodes: List<Node>) : Node()
 
 sealed class LiteralNode : ExpressionNode() {
-    data class IntegerLiteral(val value: Int) : LiteralNode()
-    data class FloatLiteral(val value: Double) : LiteralNode()
-    data class StringLiteral(val value: String) : LiteralNode()
-    data class BooleanLiteral(val value: Boolean) : LiteralNode()
+    abstract fun runtimeValue(): RuntimeValue
+
+    data class IntegerLiteral(val value: Int) : LiteralNode() {
+        override fun runtimeValue(): RuntimeValue {
+            return RuntimeValue.IntegerValue(value)
+        }
+    }
+    data class FloatLiteral(val value: Double) : LiteralNode() {
+        override fun runtimeValue(): RuntimeValue {
+            return RuntimeValue.FloatValue(value)
+        }
+    }
+    data class StringLiteral(val value: String) : LiteralNode() {
+        override fun runtimeValue(): RuntimeValue {
+            return RuntimeValue.StringValue(value)
+        }
+    }
+    data class BooleanLiteral(val value: Boolean) : LiteralNode() {
+        override fun runtimeValue(): RuntimeValue {
+            return RuntimeValue.BooleanValue(value)
+        }
+    }
 }
 
 data class BinaryOperationNode(val left: ExpressionNode, val right: ExpressionNode, val type: BinaryOperationType) :
