@@ -4,8 +4,15 @@ import org.vanadium.avo.exception.AvoRuntimeException
 import org.vanadium.avo.runtime.RuntimeValue.*
 import org.vanadium.avo.syntax.ast.*
 import org.vanadium.avo.types.DataType
+import java.util.*
 
-class Interpreter(val scope: Scope) {
+class Interpreter {
+    private var scopes: Stack<Scope> = Stack()
+    val scope get() = scopes.peek()
+
+    init {
+        scopes.push(Scope(null))
+    }
 
     fun eval(node: ExpressionNode): RuntimeValue = when (node) {
         is BinaryOperationNode -> evalBinaryExpressionNode(node)
@@ -14,6 +21,7 @@ class Interpreter(val scope: Scope) {
         is VariableReferenceNode -> evalVariableReferenceNode(node)
         is VariableAssignmentNode -> evalVariableAssignmentNode(node)
         is FunctionDefinitionNode -> evalFunctionDefinitionNode(node)
+        is FunctionCallNode -> evalFunctionCallNode(node)
         else -> throw AvoRuntimeException(
             "Could not evaluate expression node ${node.javaClass.simpleName}"
         )
@@ -112,4 +120,49 @@ class Interpreter(val scope: Scope) {
         return LambdaValue(function)
     }
 
+    private fun evalFunctionCallNode(node: FunctionCallNode): RuntimeValue {
+        val function = scope.getFunctionOrLambda(node.identifier.value)
+        if (function.signature.size != node.parameters.size)
+            throw AvoRuntimeException(
+                "Function \"${node.identifier.value}\" expected ${function.signature.size} parameters, but " +
+                        "received ${node.parameters.size}"
+            )
+
+        // The usable function scope is a new child scope of the captured scope
+        val functionScope = Scope(function.scope)
+        scopes.push(functionScope)
+
+        val params = function.signature.zip(node.parameters)
+        params.forEachIndexed { i, param ->
+            val value = eval(param.second.expression)
+            if (param.first.type != value.dataType())
+                throw AvoRuntimeException(
+                    "Parameter \"${param.first.identifier.value}\" of function \"${node.identifier.value}\" " +
+                            "is declared with type $value but received ${param.first.type}"
+                )
+
+            // Declare signature variables in the function scope
+            scope.declareVariable(param.first.identifier.value, value.dataType(), value)
+        }
+
+        var returnValue: RuntimeValue? = null
+
+        for (node in function.block.nodes) {
+            if (node is ReturnStatementNode) {
+                returnValue = eval(node.expression)
+                break
+            }
+            if (node is ExpressionNode) {
+                eval(node)
+            }
+        }
+
+        // Leave the function scope
+        scopes.pop()
+
+        return returnValue ?: (if (function.returnType is DataType.VoidType) VoidValue()
+        else throw AvoRuntimeException(
+            "Function \"${node.identifier.value}\" does not return a value on all paths"
+        ))
+    }
 }

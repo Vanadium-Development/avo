@@ -1,2 +1,9 @@
-var a: (int) | int = fun test (a: int) returns int {
+fun mk_progressBar_character() | string {
+    return "="
 }
+
+fun mk_progressBar(length: int) | string {
+    return "[" + (mk_progressBar_character() * length) + "]"
+}
+
+mk_progressBar(5)

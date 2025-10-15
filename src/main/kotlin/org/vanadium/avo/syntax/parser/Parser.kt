@@ -383,6 +383,7 @@ class Parser(lexer: Lexer) {
                     throw SyntaxException(
                         "Expected more parameters after ',', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
                     )
+                tokenStream.consume()
                 continue
             }
         }
@@ -419,7 +420,7 @@ class Parser(lexer: Lexer) {
         }
 
         // Parse return type
-        if (tokenStream.currentToken.type == TokenType.KW_RETURNS) {
+        if (tokenStream.currentToken.type == TokenType.VBAR) {
             tokenStream.consume()
             returnType = parseDataType()
         }

@@ -100,9 +100,6 @@ enum class TokenType {
     @KeywordToken("void")
     KW_VOID,
 
-    @KeywordToken("returns")
-    KW_RETURNS,
-
     @CharacterToken('(')
     LPAREN,
 

@@ -14,7 +14,7 @@ fun main() {
     val l = Lexer(str)
     val parser = Parser(l)
     val ast = parser.parse()
-    val interpreter = Interpreter(Scope(null))
+    val interpreter = Interpreter()
     println(Gson().newBuilder().setPrettyPrinting().create().toJson(ast))
 
     ast.nodes.forEach {
