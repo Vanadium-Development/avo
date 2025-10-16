@@ -1,3 +1,5 @@
-fun (name: string) | string {
-    return name
-}("Test")
+fun | (string) | string {
+    return fun (name: string) | string {
+        return "Sze"
+    }
+}

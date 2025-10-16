@@ -45,7 +45,12 @@ data class BinaryOperationNode(val left: ExpressionNode, val right: ExpressionNo
 
 data class UnaryOperationNode(val expression: ExpressionNode, val operation: UnaryOperationType) : ExpressionNode()
 
-data class BlockExpressionNode(val nodes: List<Node>, val parent: BlockExpressionNode?)
+data class BlockExpressionNode(
+    val nodes: List<Node>,
+
+    @Transient
+    val parent: BlockExpressionNode?
+)
 
 data class ConditionalExpressionNode(
     val branches: List<ConditionalExpressionBranch>,
