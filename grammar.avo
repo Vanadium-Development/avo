@@ -1,9 +1,3 @@
-var imie: () | string = fun | string {
-    return "Bonifacy"
-}
-
-fun szebon() | string {
-    return "Hello, " + imie()
-}
-
-szebon()
+fun (name: string) | string {
+    return name
+}("Test")

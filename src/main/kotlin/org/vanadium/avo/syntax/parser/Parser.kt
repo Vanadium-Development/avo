@@ -154,7 +154,7 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseFactor(): ExpressionNode {
-        var literal: ExpressionNode? = when (tokenStream.currentToken.type) {
+        var factor: ExpressionNode? = when (tokenStream.currentToken.type) {
             TokenType.FLOAT_LITERAL -> LiteralNode.FloatLiteral(tokenStream.currentToken.value.toDouble())
             TokenType.INTEGER_LITERAL -> LiteralNode.IntegerLiteral(tokenStream.currentToken.value.toInt())
             TokenType.STRING_LITERAL -> LiteralNode.StringLiteral(tokenStream.currentToken.value)
@@ -163,33 +163,36 @@ class Parser(lexer: Lexer) {
             else -> null
         }
 
-        if (literal != null) {
+        if (factor != null) {
             tokenStream.consume()
-            return literal
         }
 
-        literal = when (tokenStream.currentToken.type) {
-            TokenType.KW_VAR -> parseVariableDeclaration()
-            TokenType.KW_IF -> parseConditionalExpression()
-            TokenType.KW_FUN -> parseFunctionDefinition()
-            else -> null
+        if (factor == null) {
+            factor = when (tokenStream.currentToken.type) {
+                TokenType.KW_VAR -> parseVariableDeclaration()
+                TokenType.KW_IF -> parseConditionalExpression()
+                TokenType.KW_FUN -> parseFunctionDefinition()
+                else -> null
+            }
         }
 
-        if (literal != null) {
-            return literal
-        }
-
-        if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
-            return when (tokenStream.nextToken.type) {
-                TokenType.LPAREN -> parseFunctionCall()
+        if (factor == null && tokenStream.currentToken.type == TokenType.IDENTIFIER) {
+            factor = when (tokenStream.nextToken.type) {
                 TokenType.EQUALS -> parseVariableAssignment()
                 else -> parseVariableReference()
             }
         }
 
-        throw SyntaxException(
+        factor ?: throw SyntaxException(
             "Expected a factor, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
         )
+
+        // Expression Call
+        if (tokenStream.currentToken.type != TokenType.LPAREN)
+            return factor
+
+        val params = parseExpressionCallParameters()
+        return ExpressionCallNode(factor, params)
     }
 
     private fun parseVariableDeclaration(): VariableDeclarationNode {
@@ -249,7 +252,7 @@ class Parser(lexer: Lexer) {
         return VariableAssignmentNode(id, expr)
     }
 
-    private fun parseVariableReference(): VariableReferenceNode {
+    private fun parseVariableReference(): SymbolReferenceNode {
         if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
             throw SyntaxException(
                 "Expected identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
@@ -259,7 +262,7 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        return VariableReferenceNode(id)
+        return SymbolReferenceNode(id)
     }
 
     private fun parseBlockExpression(): BlockExpressionNode {
@@ -435,16 +438,7 @@ class Parser(lexer: Lexer) {
         return FunctionDefinitionNode(identifier, anon, parameters, returnType, block)
     }
 
-    private fun parseFunctionCall(): FunctionCallNode {
-        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
-            throw SyntaxException(
-                "Expected function identifier, got ${tokenStream.currentToken.type} Error on line ${tokenStream.currentToken.line}"
-            )
-
-        val id = tokenStream.currentToken
-
-        tokenStream.consume()
-
+    private fun parseExpressionCallParameters(): List<ExpressionCallNode.CallParameter> {
         if (tokenStream.currentToken.type != TokenType.LPAREN)
             throw SyntaxException(
                 "Expected '(', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
@@ -452,12 +446,12 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        val parameters = mutableListOf<FunctionCallNode.FunctionCallParameter>()
+        val parameters = mutableListOf<ExpressionCallNode.CallParameter>()
 
         while (tokenStream.currentToken.type != TokenType.RPAREN && !tokenStream.currentToken.isEof()) {
             val expr = parseExpression()
 
-            parameters.add(FunctionCallNode.FunctionCallParameter(expr))
+            parameters.add(ExpressionCallNode.CallParameter(expr))
 
             if (tokenStream.currentToken.type == TokenType.COMMA) {
                 if (tokenStream.nextToken.type == TokenType.RPAREN)
@@ -476,7 +470,7 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        return FunctionCallNode(id, parameters)
+        return parameters
     }
 
 }

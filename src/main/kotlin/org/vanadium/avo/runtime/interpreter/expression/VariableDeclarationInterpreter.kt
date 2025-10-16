@@ -9,7 +9,6 @@ import org.vanadium.avo.types.DataType
 
 class VariableDeclarationInterpreter(interpreter: Interpreter) :
     ExpressionInterpreter<VariableDeclarationNode>(interpreter) {
-
     private fun DataType.variableDefaultValue() = when (this) {
         DataType.IntegerType -> RuntimeValue.IntegerValue.Companion.defaultValue()
         DataType.StringType -> RuntimeValue.StringValue.Companion.defaultValue()
@@ -31,7 +30,6 @@ class VariableDeclarationInterpreter(interpreter: Interpreter) :
             "Complex types are not supported yet"
         )
     }
-
 
     override fun evaluate(node: VariableDeclarationNode): RuntimeValue {
         val expr = if (node.value == null) {

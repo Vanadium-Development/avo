@@ -7,14 +7,13 @@ import org.vanadium.avo.types.DataType
 
 data class Scope(val parent: Scope? = null) {
 
-    private val variables = mutableMapOf<String, Variable>()
-    private val functions = mutableMapOf<String, Function>()
+    private val symbols = mutableMapOf<String, Symbol>()
 
     /**
      * Check whether a given identifier is already used in the current scope.
      */
     private fun isIdentifierTaken(identifier: String) =
-        variables.containsKey(identifier) || functions.containsKey(identifier)
+        symbols.containsKey(identifier)
 
     /**
      * Create a variable in the current scope.
@@ -24,17 +23,7 @@ data class Scope(val parent: Scope? = null) {
         if (isIdentifierTaken(identifier)) {
             throw AvoRuntimeException("Duplicate identifier: $identifier")
         }
-        variables[identifier] = Variable(this, expression, type)
-    }
-
-    /**
-     * Retrieve a variable from the current scope or one of the parent scopes.
-     * This will fail if the variable is not found.
-     */
-    fun getVariable(identifier: String): Variable {
-        return (variables[identifier]
-            ?: parent?.getVariable(identifier))
-            ?: throw AvoRuntimeException("Undefined variable: $identifier")
+        symbols[identifier] = Symbol.Variable(this, expression, type)
     }
 
     /**
@@ -42,8 +31,11 @@ data class Scope(val parent: Scope? = null) {
      * This will fail if the variable is not found.
      */
     fun assignVariable(identifier: String, expression: RuntimeValue) {
-        if (variables.containsKey(identifier)) {
-            variables[identifier]!!.value = expression
+        if (symbols.containsKey(identifier)) {
+            if (symbols[identifier] !is Symbol.Variable)
+                throw AvoRuntimeException("Symbol is not a variable: $identifier")
+
+            (symbols[identifier] as Symbol.Variable).value = expression
             return
         }
 
@@ -61,11 +53,8 @@ data class Scope(val parent: Scope? = null) {
     fun capture(): Scope {
         val parentSnapshot = parent?.capture()
         val copy = Scope(parentSnapshot)
-        variables.forEach { (identifier, variable) ->
-            copy.variables[identifier] = variable
-        }
-        functions.forEach { (identifier, function) ->
-            copy.functions[identifier] = function
+        symbols.forEach { (identifier, variable) ->
+            copy.symbols[identifier] = variable
         }
         return copy
     }
@@ -79,57 +68,37 @@ data class Scope(val parent: Scope? = null) {
         signature: List<FunctionDefinitionNode.FunctionSignatureParameter>,
         returnType: DataType,
         block: BlockExpressionNode
-    ): Function {
+    ): Symbol.Function {
         // Anonymous Function
         if (identifier == null) {
-            return Function(Scope(capture()), signature, returnType, block)
+            return Symbol.Function(Scope(capture()), identifier, signature, returnType, block)
         }
 
         if (isIdentifierTaken(identifier)) {
             throw AvoRuntimeException("Duplicate function with identifier $identifier")
         }
 
-        functions[identifier] = Function(this, signature, returnType, block)
-        val function = Function(Scope(capture()), signature, returnType, block)
-        functions[identifier] = function
+        symbols[identifier] = Symbol.Function(this, identifier, signature, returnType, block)
+        val function = Symbol.Function(Scope(capture()), identifier, signature, returnType, block)
+        symbols[identifier] = function
 
         return function
     }
 
     /**
-     * Retrieve a function. This will not find a lambda variable.
+     * Get a symbol from the current or the parent scopes.
+     * This will fail if the symbol cannot be found.
      */
-    fun getFunction(identifier: String): Function {
-        return functions[identifier] ?: throw AvoRuntimeException("Undefined function: $identifier")
+    fun getSymbol(identifier: String): Symbol {
+        val symbol = symbols[identifier]
+        if (symbol != null) {
+            return symbol
+        }
+
+        if (parent == null)
+            throw AvoRuntimeException("Undefined symbol: $identifier")
+
+        return parent.getSymbol(identifier)
     }
 
-    /**
-     * Retrieve a function or a lambda variable that can be invoked as a function
-     */
-    fun getFunctionOrLambda(identifier: String): Function {
-        val function = functions[identifier]
-        if (function != null) {
-            return function
-        }
-
-        val variable = variables[identifier]
-        if (variable != null) {
-            if (variable.type !is DataType.LambdaType || variable.value !is RuntimeValue.LambdaValue)
-                throw AvoRuntimeException(
-                    "Cannot invoke \"$identifier\": Not a lambda variable"
-                )
-
-            return (variable.value as RuntimeValue.LambdaValue).function
-        }
-
-        val parentLambda = parent?.getFunctionOrLambda(identifier)
-
-        if (parentLambda != null) {
-            return parentLambda
-        }
-
-        throw AvoRuntimeException(
-            "Cannot invoke \"$identifier\": Not a function nor lambda variable"
-        )
-    }
 }

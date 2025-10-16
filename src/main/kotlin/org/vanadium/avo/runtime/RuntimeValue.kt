@@ -221,7 +221,7 @@ sealed class RuntimeValue {
         }
     }
 
-    data class LambdaValue(val function: Function) : RuntimeValue() {
+    data class LambdaValue(val function: Symbol.Function) : RuntimeValue() {
         override fun plus(other: RuntimeValue): RuntimeValue {
             throw SyntaxException("Lambda cannot be part of a mathematical operation")
         }

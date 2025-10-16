@@ -13,6 +13,7 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.20")
     implementation("com.google.code.gson:gson:2.13.2")
+    implementation("org.reflections:reflections:0.10.2")
 }
 
 kotlin {

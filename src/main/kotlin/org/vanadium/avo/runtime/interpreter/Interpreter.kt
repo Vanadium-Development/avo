@@ -18,12 +18,12 @@ class Interpreter {
     init {
         scopes.push(Scope(null))
         registerInterpreter<BinaryOperationNode>(BinaryOperationInterpreter::class)
-        registerInterpreter<FunctionCallNode>(FunctionCallInterpreter::class)
+        registerInterpreter<ExpressionCallNode>(ExpressionCallInterpreter::class)
         registerInterpreter<FunctionDefinitionNode>(FunctionDefinitionInterpreter::class)
         registerInterpreter<LiteralNode>(LiteralExpressionInterpreter::class)
         registerInterpreter<VariableAssignmentNode>(VariableAssignmentInterpreter::class)
         registerInterpreter<VariableDeclarationNode>(VariableDeclarationInterpreter::class)
-        registerInterpreter<VariableReferenceNode>(VariableReferenceInterpreter::class)
+        registerInterpreter<SymbolReferenceNode>(SymbolReferenceInterpreter::class)
     }
 
     private inline fun <reified T : ExpressionNode> registerInterpreter(clazz: KClass<out ExpressionInterpreter<T>>) {

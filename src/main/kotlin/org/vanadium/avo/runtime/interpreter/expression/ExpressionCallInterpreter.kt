@@ -5,18 +5,25 @@ import org.vanadium.avo.runtime.RuntimeValue
 import org.vanadium.avo.runtime.Scope
 import org.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import org.vanadium.avo.runtime.interpreter.Interpreter
+import org.vanadium.avo.syntax.ast.ExpressionCallNode
 import org.vanadium.avo.syntax.ast.ExpressionNode
-import org.vanadium.avo.syntax.ast.FunctionCallNode
 import org.vanadium.avo.syntax.ast.ReturnStatementNode
 import org.vanadium.avo.types.DataType
 
-class FunctionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<FunctionCallNode>(interpreter) {
+class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<ExpressionCallNode>(interpreter) {
+    override fun evaluate(node: ExpressionCallNode): RuntimeValue {
+        val expression = evaluateOther(node.expression)
 
-    override fun evaluate(node: FunctionCallNode): RuntimeValue {
-        val function = scope.getFunctionOrLambda(node.identifier.value)
+        if (expression !is RuntimeValue.LambdaValue)
+            throw AvoRuntimeException(
+                "Expression is not callable"
+            )
+
+        val function = expression.function
+
         if (function.signature.size != node.parameters.size)
             throw AvoRuntimeException(
-                "Function \"${node.identifier.value}\" expected ${function.signature.size} parameters, but " +
+                "Function \"${function.name()}\" expected ${function.signature.size} parameters, but " +
                         "received ${node.parameters.size}"
             )
 
@@ -29,7 +36,7 @@ class FunctionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<
             val value = evaluateOther(param.second.expression)
             if (param.first.type != value.dataType())
                 throw AvoRuntimeException(
-                    "Parameter \"${param.first.identifier.value}\" of function \"${node.identifier.value}\" " +
+                    "Parameter \"${param.first.identifier.value}\" of function \"${function.name()}\" " +
                             "is declared with type $value but received ${param.first.type}"
                 )
 
@@ -54,7 +61,7 @@ class FunctionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<
 
         return returnValue ?: (if (function.returnType is DataType.VoidType) RuntimeValue.VoidValue()
         else throw AvoRuntimeException(
-            "Function \"${node.identifier.value}\" does not return a value on all paths"
+            "Function \"${function.name()}\" does not return a value on all paths"
         ))
     }
 }

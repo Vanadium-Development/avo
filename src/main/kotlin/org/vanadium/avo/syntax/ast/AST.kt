@@ -72,8 +72,8 @@ data class FunctionDefinitionNode(
     data class FunctionSignatureParameter(val identifier: Token, val type: DataType)
 }
 
-data class FunctionCallNode(val identifier: Token, val parameters: List<FunctionCallParameter>) : ExpressionNode() {
-    data class FunctionCallParameter(val expression: ExpressionNode)
+data class ExpressionCallNode(val expression: ExpressionNode, val parameters: List<CallParameter>) : ExpressionNode() {
+    data class CallParameter(val expression: ExpressionNode)
 }
 
 data class VariableDeclarationNode(val identifier: Token, var type: DataType, val value: ExpressionNode?) :
@@ -81,7 +81,7 @@ data class VariableDeclarationNode(val identifier: Token, var type: DataType, va
 
 data class VariableAssignmentNode(val identifier: Token, val value: ExpressionNode) : ExpressionNode()
 
-data class VariableReferenceNode(val identifier: Token) : ExpressionNode()
+data class SymbolReferenceNode(val identifier: Token) : ExpressionNode()
 
 data class ReturnStatementNode(val expression: ExpressionNode) : StatementNode()
 

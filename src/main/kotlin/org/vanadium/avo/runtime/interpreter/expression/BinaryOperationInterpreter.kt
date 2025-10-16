@@ -9,7 +9,6 @@ import org.vanadium.avo.syntax.ast.BinaryOperationType
 class BinaryOperationInterpreter(
     interpreter: Interpreter
 ) : ExpressionInterpreter<BinaryOperationNode>(interpreter) {
-
     override fun evaluate(node: BinaryOperationNode): RuntimeValue {
         val left = evaluateOther(node.left)
         val right = evaluateOther(node.right)
