@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.20")
     implementation("com.google.code.gson:gson:2.13.2")
 }
 

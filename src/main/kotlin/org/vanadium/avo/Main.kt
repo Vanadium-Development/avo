@@ -1,8 +1,7 @@
 package org.vanadium.avo
 
 import com.google.gson.Gson
-import org.vanadium.avo.runtime.Interpreter
-import org.vanadium.avo.runtime.Scope
+import org.vanadium.avo.runtime.interpreter.Interpreter
 import org.vanadium.avo.syntax.ast.ExpressionNode
 import org.vanadium.avo.syntax.lexer.Lexer
 import org.vanadium.avo.syntax.parser.Parser
@@ -18,7 +17,7 @@ fun main() {
     println(Gson().newBuilder().setPrettyPrinting().create().toJson(ast))
 
     ast.nodes.forEach {
-        println("--> ${interpreter.eval(it as ExpressionNode)}")
+        println("--> ${interpreter.evaluate(it as ExpressionNode)}")
     }
 
 }
