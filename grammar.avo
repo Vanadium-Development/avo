@@ -1,5 +1,7 @@
-fun | (string) | string {
-    return fun (name: string) | string {
-        return "Sze"
+(var f: ? = (
+    fun a | (string) | string {
+        return fun (name: string) | string {
+            return name + " is very long!"
+        }
     }
-}
+)()("Szebon"))
