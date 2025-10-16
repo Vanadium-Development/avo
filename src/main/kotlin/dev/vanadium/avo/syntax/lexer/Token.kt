@@ -1,32 +1,45 @@
 package dev.vanadium.avo.syntax.lexer
 
-annotation class CharacterToken(val value: Char)
+annotation class Symbol(val value: Char)
 
-annotation class KeywordToken(val value: String)
+annotation class CompoundSymbol(val first: Char, val second: Char)
+
+annotation class Keyword(val value: String)
 
 /**
  * Find token type for keyword or character
  */
 fun String.findTokenType(): TokenType? {
     val typeName = TokenType::class.java.declaredFields.filter {
-        it.isAnnotationPresent(CharacterToken::class.java) ||
-                it.isAnnotationPresent(KeywordToken::class.java)
+        it.isAnnotationPresent(Symbol::class.java) || it.isAnnotationPresent(CompoundSymbol::class.java) || it.isAnnotationPresent(
+            Keyword::class.java
+        )
     }.find {
-        var annotation: Annotation? = it.getAnnotation(CharacterToken::class.java)
+        var annotation: Annotation? = it.getAnnotation(Symbol::class.java)
         if (annotation != null) {
             if (length != 1) {
-                return null
+                return@find false
             }
-            val charAnnotation = annotation as CharacterToken
+            val charAnnotation = annotation as Symbol
             if (charAnnotation.value == get(0)) {
                 return@find true
             }
         }
 
-        annotation = it.getAnnotation(KeywordToken::class.java)
+        annotation = it.getAnnotation(Keyword::class.java)
         if (annotation != null) {
             val keywordAnnotation = annotation
             if (keywordAnnotation.value == this) {
+                return@find true
+            }
+        }
+
+        annotation = it.getAnnotation(CompoundSymbol::class.java)
+        if (annotation == null) return@find false
+
+        if (this.length == 2) {
+            val compoundSymbolAnnotation = annotation
+            if (this[0] == compoundSymbolAnnotation.first && this[1] == compoundSymbolAnnotation.second) {
                 return@find true
             }
         }
@@ -42,8 +55,7 @@ fun String.findTokenType(): TokenType? {
 }
 
 enum class TokenType {
-    EOF,
-    UNDEFINED,
+    EOF, UNDEFINED,
 
     GENERIC_SYMBOL,
 
@@ -53,119 +65,101 @@ enum class TokenType {
     FLOAT_LITERAL,
     STRING_LITERAL,
 
-    @KeywordToken("var")
-    KW_VAR,
+    //
+    // Keywords
+    //
 
-    @KeywordToken("while")
-    KW_WHILE,
+    @Keyword("var") KW_VAR,
 
-    @KeywordToken("if")
-    KW_IF,
+    @Keyword("while") KW_WHILE,
 
-    @KeywordToken("else")
-    KW_ELSE,
+    @Keyword("if") KW_IF,
 
-    @KeywordToken("fun")
-    KW_FUN,
+    @Keyword("else") KW_ELSE,
 
-    @KeywordToken("true")
-    KW_TRUE,
+    @Keyword("fun") KW_FUN,
 
-    @KeywordToken("false")
-    KW_FALSE,
+    @Keyword("true") KW_TRUE,
 
-    @KeywordToken("return")
-    KW_RETURN,
+    @Keyword("false") KW_FALSE,
 
-    @KeywordToken("continue")
-    KW_CONTINUE,
+    @Keyword("return") KW_RETURN,
 
-    @KeywordToken("break")
-    KW_BREAK,
+    @Keyword("continue") KW_CONTINUE,
 
-    @KeywordToken("int")
-    KW_INT,
+    @Keyword("break") KW_BREAK,
 
-    @KeywordToken("float")
-    KW_FLOAT,
+    @Keyword("int") KW_INT,
 
-    @KeywordToken("string")
-    KW_STRING,
+    @Keyword("float") KW_FLOAT,
 
-    @KeywordToken("bool")
-    KW_BOOL,
+    @Keyword("string") KW_STRING,
 
-    @KeywordToken("void")
-    KW_VOID,
+    @Keyword("bool") KW_BOOL,
 
-    @CharacterToken('(')
-    LPAREN,
+    @Keyword("void") KW_VOID,
 
-    @CharacterToken(')')
-    RPAREN,
+    //
+    // Symbols
+    //
 
-    @CharacterToken('{')
-    LBRACE,
+    @Symbol('(') LPAREN,
 
-    @CharacterToken('}')
-    RBRACE,
+    @Symbol(')') RPAREN,
 
-    @CharacterToken('[')
-    LBRACKET,
+    @Symbol('{') LBRACE,
 
-    @CharacterToken(']')
-    RBRACKET,
+    @Symbol('}') RBRACE,
 
-    @CharacterToken(',')
-    COMMA,
+    @Symbol('[') LBRACKET,
 
-    @CharacterToken(':')
-    COLON,
+    @Symbol(']') RBRACKET,
 
-    @CharacterToken(';')
-    SEMICOLON,
+    @Symbol(',') COMMA,
 
-    @CharacterToken('=')
-    EQUALS,
+    @Symbol(':') COLON,
 
-    @CharacterToken('@')
-    AT,
+    @Symbol(';') SEMICOLON,
 
-    @CharacterToken('&')
-    AMPERSAND,
+    @Symbol('=') EQUALS,
 
-    @CharacterToken('+')
-    PLUS,
+    @Symbol('@') AT,
 
-    @CharacterToken('-')
-    MINUS,
+    @Symbol('&') AMPERSAND,
 
-    @CharacterToken('/')
-    SLASH,
+    @Symbol('+') PLUS,
 
-    @CharacterToken('*')
-    ASTERISK,
+    @Symbol('-') MINUS,
 
-    @CharacterToken('<')
-    LESS_THAN,
+    @Symbol('/') SLASH,
 
-    @CharacterToken('>')
-    GREATER_THAN,
+    @Symbol('*') ASTERISK,
 
-    @CharacterToken('.')
-    DOT,
+    @Symbol('<') LESS_THAN,
 
-    @CharacterToken('^')
-    CARET,
+    @Symbol('>') GREATER_THAN,
 
-    @CharacterToken('?')
-    QUESTION_MARK,
+    @Symbol('.') DOT,
 
-    @CharacterToken('%')
-    PERCENT,
+    @Symbol('^') CARET,
 
-    @CharacterToken('|')
-    VBAR;
+    @Symbol('?') QUESTION_MARK,
+
+    @Symbol('%') PERCENT,
+
+    //
+    // Compound Symbols
+    //
+
+    @CompoundSymbol('-', '>') RIGHT_ARROW,
+
+    @CompoundSymbol('=', '=') DOUBLE_EQUALS,
+
+    @CompoundSymbol('!', '=') NOT_EQUALS,
+
+    @CompoundSymbol('>', '=') GREATER_EQUAL,
+
+    @CompoundSymbol('<', '=') LESS_EQUAL;
 
     fun isAdditiveOperation() = (this == PLUS || this == MINUS)
 
@@ -184,8 +178,8 @@ data class Token(val value: String, val type: TokenType, val line: Int) {
     fun typeAdjusted(): Token {
         return Token(
             this.value,
-            if (this.type == TokenType.GENERIC_SYMBOL || this.type == TokenType.IDENTIFIER) (this.value.findTokenType()
-                ?: type) else type,
+            if (this.type == TokenType.GENERIC_SYMBOL || this.type == TokenType.IDENTIFIER)
+                (this.value.findTokenType() ?: type) else type,
             this.line
         )
     }

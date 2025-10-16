@@ -25,9 +25,9 @@ class Parser(lexer: Lexer) {
     private fun parseLambdaType(): DataType.LambdaType {
         val signature = parseFunctionSignature(false)
 
-        if (tokenStream.currentToken.type != TokenType.VBAR)
+        if (tokenStream.currentToken.type != TokenType.RIGHT_ARROW)
             throw SyntaxException(
-                "Expected '|', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+                "Expected '->', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
             )
 
         tokenStream.consume()
@@ -434,7 +434,7 @@ class Parser(lexer: Lexer) {
         }
 
         // Parse return type
-        if (tokenStream.currentToken.type == TokenType.VBAR) {
+        if (tokenStream.currentToken.type == TokenType.RIGHT_ARROW) {
             tokenStream.consume()
             returnType = parseDataType()
         }

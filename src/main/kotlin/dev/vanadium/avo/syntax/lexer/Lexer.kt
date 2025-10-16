@@ -102,8 +102,21 @@ class Lexer(val input: String) {
             token.append(c)
             advance()
 
-            if (isSymbol)
+            if (isSymbol) {
+                val first = c
+                val second = peek() ?: break
+                if (second.classify(nextType) != TokenType.GENERIC_SYMBOL) {
+                    break
+                }
+
+                val compoundToken = "$first$second"
+                val compoundType = compoundToken.findTokenType() ?: break
+
+                type = compoundType
+                token.append(second)
+                advance()
                 break
+            }
         }
 
         return if (token.isEmpty()) Token.eof()

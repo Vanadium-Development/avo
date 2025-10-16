@@ -1,6 +1,6 @@
 (var f: ? = (
-    fun a | (string) | string {
-        return fun (name: string) | string {
+    fun a -> (string) -> string {
+        return fun (name: string) -> string {
             return name + " is very long!"
         }
     }
