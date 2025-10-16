@@ -33,7 +33,7 @@ sealed class DataType {
         val signature: List<DataType>,
         val returnType: DataType
     ) : DataType() {
-        override fun toString() = "(${signature.joinToString(", ") { it.toString() }}) -> $returnType"
+        override fun toString() = "[(${signature.joinToString(", ") { it.toString() }}) -> $returnType]"
     }
 
     data class ComplexType(val name: String) : DataType()

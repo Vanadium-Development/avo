@@ -1,7 +1,7 @@
-(var f: ? = (
-    fun a -> (string) -> string {
+(var f: ? =
+    fun a -> [(string) -> string] {
         return fun (name: string) -> string {
             return name + " is very long!"
         }
     }
-)()("Szebon"))
+)()("Szebon")

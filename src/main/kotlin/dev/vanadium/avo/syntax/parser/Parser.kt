@@ -23,6 +23,13 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseLambdaType(): DataType.LambdaType {
+        if (tokenStream.currentToken.type != TokenType.LBRACKET)
+            throw SyntaxException(
+                "Expected '[', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
+
         val signature = parseFunctionSignature(false)
 
         if (tokenStream.currentToken.type != TokenType.RIGHT_ARROW)
@@ -33,6 +40,13 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         val returnType = parseDataType()
+
+        if (tokenStream.currentToken.type != TokenType.RBRACKET)
+            throw SyntaxException(
+                "Expected ']', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
 
         return DataType.LambdaType(signature.map { it.type }, returnType)
     }
@@ -54,7 +68,7 @@ class Parser(lexer: Lexer) {
             return type
         }
 
-        if (tokenStream.currentToken.type == TokenType.LPAREN) {
+        if (tokenStream.currentToken.type == TokenType.LBRACKET) {
             return parseLambdaType()
         }
 
