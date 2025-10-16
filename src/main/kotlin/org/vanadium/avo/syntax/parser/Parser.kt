@@ -406,9 +406,14 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        val identifier = tokenStream.currentToken
+        var anon = true
+        var identifier = Token.eof()
 
-        tokenStream.consume()
+        if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
+            anon = false
+            identifier = tokenStream.currentToken
+            tokenStream.consume()
+        }
 
         var returnType: DataType = DataType.VoidType
 
@@ -427,7 +432,7 @@ class Parser(lexer: Lexer) {
 
         val block = parseBlockExpression()
 
-        return FunctionDefinitionNode(identifier, parameters, returnType, block)
+        return FunctionDefinitionNode(identifier, anon, parameters, returnType, block)
     }
 
     private fun parseFunctionCall(): FunctionCallNode {

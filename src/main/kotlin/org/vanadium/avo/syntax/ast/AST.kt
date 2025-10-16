@@ -64,6 +64,7 @@ data class ConditionalExpressionNode(
 
 data class FunctionDefinitionNode(
     val identifier: Token,
+    val anonymous: Boolean,
     val parameters: List<FunctionSignatureParameter>,
     val returnType: DataType,
     val block: BlockExpressionNode

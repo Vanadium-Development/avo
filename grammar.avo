@@ -1,9 +1,9 @@
-fun mk_progressBar_character() | string {
-    return "="
+var imie: () | string = fun | string {
+    return "Bonifacy"
 }
 
-fun mk_progressBar(length: int) | string {
-    return "[" + (mk_progressBar_character() * length) + "]"
+fun szebon() | string {
+    return "Hello, " + imie()
 }
 
-mk_progressBar(5)
+szebon()

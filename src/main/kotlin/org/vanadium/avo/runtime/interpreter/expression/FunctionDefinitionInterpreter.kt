@@ -11,7 +11,7 @@ class FunctionDefinitionInterpreter(interpreter: Interpreter) : ExpressionInterp
 
     override fun evaluate(node: FunctionDefinitionNode): RuntimeValue {
         val function = scope.defineFunction(
-            node.identifier.value,
+            if (node.anonymous) null else node.identifier.value,
             node.parameters,
             node.returnType,
             node.block

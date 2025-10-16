@@ -75,11 +75,16 @@ data class Scope(val parent: Scope? = null) {
      * This will fail if the identifier is already in use.
      */
     fun defineFunction(
-        identifier: String,
+        identifier: String?,
         signature: List<FunctionDefinitionNode.FunctionSignatureParameter>,
         returnType: DataType,
         block: BlockExpressionNode
     ): Function {
+        // Anonymous Function
+        if (identifier == null) {
+            return Function(Scope(capture()), signature, returnType, block)
+        }
+
         if (isIdentifierTaken(identifier)) {
             throw AvoRuntimeException("Duplicate function with identifier $identifier")
         }
