@@ -2,21 +2,8 @@ package org.vanadium.avo.runtime.interpreter
 
 import org.vanadium.avo.runtime.RuntimeValue
 import org.vanadium.avo.runtime.Scope
-import org.vanadium.avo.runtime.interpreter.expression.BinaryOperationInterpreter
-import org.vanadium.avo.runtime.interpreter.expression.FunctionCallInterpreter
-import org.vanadium.avo.runtime.interpreter.expression.FunctionDefinitionInterpreter
-import org.vanadium.avo.runtime.interpreter.expression.LiteralExpressionInterpreter
-import org.vanadium.avo.runtime.interpreter.expression.VariableAssignmentInterpreter
-import org.vanadium.avo.runtime.interpreter.expression.VariableDeclarationInterpreter
-import org.vanadium.avo.runtime.interpreter.expression.VariableReferenceInterpreter
-import org.vanadium.avo.syntax.ast.BinaryOperationNode
-import org.vanadium.avo.syntax.ast.ExpressionNode
-import org.vanadium.avo.syntax.ast.FunctionCallNode
-import org.vanadium.avo.syntax.ast.FunctionDefinitionNode
-import org.vanadium.avo.syntax.ast.LiteralNode
-import org.vanadium.avo.syntax.ast.VariableAssignmentNode
-import org.vanadium.avo.syntax.ast.VariableDeclarationNode
-import org.vanadium.avo.syntax.ast.VariableReferenceNode
+import org.vanadium.avo.runtime.interpreter.expression.*
+import org.vanadium.avo.syntax.ast.*
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf

@@ -186,7 +186,8 @@ data class Token(val value: String, val type: TokenType, val line: Int) {
     fun typeAdjusted(): Token {
         return Token(
             this.value,
-            if (this.type == TokenType.GENERIC_SYMBOL || this.type == TokenType.IDENTIFIER) (this.value.findTokenType() ?: type) else type,
+            if (this.type == TokenType.GENERIC_SYMBOL || this.type == TokenType.IDENTIFIER) (this.value.findTokenType()
+                ?: type) else type,
             this.line
         )
     }
