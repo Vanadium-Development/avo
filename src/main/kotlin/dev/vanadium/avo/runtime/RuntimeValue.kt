@@ -1,10 +1,11 @@
 package dev.vanadium.avo.runtime
 
-import dev.vanadium.avo.exception.SyntaxException
+import dev.vanadium.avo.exception.AvoRuntimeException
 import dev.vanadium.avo.types.DataType
 import kotlin.math.pow
 
 sealed class RuntimeValue {
+    // Mathematical Operations
     abstract fun plus(other: RuntimeValue): RuntimeValue
     abstract fun minus(other: RuntimeValue): RuntimeValue
     abstract fun times(other: RuntimeValue): RuntimeValue
@@ -12,6 +13,14 @@ sealed class RuntimeValue {
     abstract fun modulo(other: RuntimeValue): RuntimeValue
     abstract fun pow(other: RuntimeValue): RuntimeValue
 
+    // Comparisons
+    abstract fun greaterThan(other: RuntimeValue): RuntimeValue
+    abstract fun lessThan(other: RuntimeValue): RuntimeValue
+    abstract fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue
+    abstract fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue
+    abstract fun equal(other: RuntimeValue): RuntimeValue
+
+    // Utility
     abstract fun name(): String
 
     fun dataType() = when (this) {
@@ -28,38 +37,73 @@ sealed class RuntimeValue {
             is IntegerValue -> IntegerValue(value + other.value)
             is FloatValue -> FloatValue(value + other.value)
             is StringValue -> StringValue(value.toString() + other.value)
-            else -> throw SyntaxException("Invalid operands for addition: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for addition: ${this.name()} and ${other.name()}")
         }
 
         override fun minus(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> IntegerValue(value - other.value)
             is FloatValue -> FloatValue(value - other.value)
-            else -> throw SyntaxException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
         }
 
         override fun times(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> IntegerValue(value * other.value)
             is FloatValue -> FloatValue(value * other.value)
             is StringValue -> StringValue(other.value.repeat(value))
-            else -> throw SyntaxException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
         }
 
         override fun divide(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> IntegerValue(value / other.value)
             is FloatValue -> FloatValue(value / other.value)
-            else -> throw SyntaxException("Invalid operands for division: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for division: ${this.name()} and ${other.name()}")
         }
 
         override fun modulo(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> IntegerValue(value % other.value)
             is FloatValue -> FloatValue(value % other.value)
-            else -> throw SyntaxException("Invalid operands for modulus: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for modulus: ${this.name()} and ${other.name()}")
         }
 
         override fun pow(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> IntegerValue(value.toDouble().pow(other.value.toDouble()).toInt())
             is FloatValue -> FloatValue(value.toDouble().pow(other.value))
-            else -> throw SyntaxException("Invalid operands for power: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for power: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThan(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value > other.value)
+            is FloatValue -> BooleanValue(value > other.value)
+            is StringValue -> BooleanValue(value > other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for > comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThan(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value < other.value)
+            is FloatValue -> BooleanValue(value < other.value)
+            is StringValue -> BooleanValue(value < other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for < comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value >= other.value)
+            is FloatValue -> BooleanValue(value >= other.value)
+            is StringValue -> BooleanValue(value >= other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for >= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value <= other.value)
+            is FloatValue -> BooleanValue(value <= other.value)
+            is StringValue -> BooleanValue(value <= other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for <= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun equal(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value == other.value)
+            is FloatValue -> BooleanValue(value == other.value.toInt())
+            is StringValue -> BooleanValue(value == other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for == comparison: ${this.name()} and ${other.name()}")
         }
 
         override fun name(): String {
@@ -76,37 +120,72 @@ sealed class RuntimeValue {
             is IntegerValue -> FloatValue(value + other.value.toDouble())
             is FloatValue -> FloatValue(value + other.value)
             is StringValue -> StringValue(value.toString() + other.value)
-            else -> throw SyntaxException("Invalid operands for addition: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for addition: ${this.name()} and ${other.name()}")
         }
 
         override fun minus(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> FloatValue(value - other.value)
             is FloatValue -> FloatValue(value - other.value)
-            else -> throw SyntaxException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
         }
 
         override fun times(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> FloatValue(value * other.value)
             is FloatValue -> FloatValue(value + other.value)
-            else -> throw SyntaxException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
         }
 
         override fun divide(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> FloatValue(value / other.value)
             is FloatValue -> FloatValue(value / other.value)
-            else -> throw SyntaxException("Invalid operands for division: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for division: ${this.name()} and ${other.name()}")
         }
 
         override fun modulo(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> FloatValue(value % other.value)
             is FloatValue -> FloatValue(value % other.value)
-            else -> throw SyntaxException("Invalid operands for modulus: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for modulus: ${this.name()} and ${other.name()}")
         }
 
         override fun pow(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> FloatValue(value.pow(other.value))
             is FloatValue -> FloatValue(value.pow(other.value))
-            else -> throw SyntaxException("Invalid operands for power: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for power: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThan(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value > other.value)
+            is FloatValue -> BooleanValue(value > other.value)
+            is StringValue -> BooleanValue(value > other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for > comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThan(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value < other.value)
+            is FloatValue -> BooleanValue(value < other.value)
+            is StringValue -> BooleanValue(value < other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for < comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value >= other.value)
+            is FloatValue -> BooleanValue(value >= other.value)
+            is StringValue -> BooleanValue(value >= other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for >= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value <= other.value)
+            is FloatValue -> BooleanValue(value <= other.value)
+            is StringValue -> BooleanValue(value <= other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for <= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun equal(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value.toInt() == other.value)
+            is FloatValue -> BooleanValue(value == other.value)
+            is StringValue -> BooleanValue(value.toInt() == other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for == comparison: ${this.name()} and ${other.name()}")
         }
 
         override fun name(): String {
@@ -124,28 +203,63 @@ sealed class RuntimeValue {
             is FloatValue -> StringValue(value + other.value.toString())
             is StringValue -> StringValue(value + other.value)
             is BooleanValue -> StringValue(value + if (other.value) "true" else "false")
-            else -> throw SyntaxException("Invalid operands for addition: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for addition: ${this.name()} and ${other.name()}")
         }
 
         override fun minus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
         }
 
         override fun times(other: RuntimeValue): RuntimeValue = when (other) {
             is IntegerValue -> StringValue(value.repeat(other.value))
-            else -> throw SyntaxException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
+            else -> throw AvoRuntimeException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
         }
 
         override fun divide(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for division: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for division: ${this.name()} and ${other.name()}")
         }
 
         override fun modulo(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for modulo: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for modulo: ${this.name()} and ${other.name()}")
         }
 
         override fun pow(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for power: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for power: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThan(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value.length > other.value)
+            is FloatValue -> BooleanValue(value.length > other.value)
+            is StringValue -> BooleanValue(value.length > other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for > comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThan(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value.length < other.value)
+            is FloatValue -> BooleanValue(value.length < other.value)
+            is StringValue -> BooleanValue(value.length < other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for < comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value.length >= other.value)
+            is FloatValue -> BooleanValue(value.length >= other.value)
+            is StringValue -> BooleanValue(value.length >= other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for >= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value.length <= other.value)
+            is FloatValue -> BooleanValue(value.length <= other.value)
+            is StringValue -> BooleanValue(value.length <= other.value.length)
+            else -> throw AvoRuntimeException("Invalid operands for <= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun equal(other: RuntimeValue): RuntimeValue = when (other) {
+            is IntegerValue -> BooleanValue(value.length == other.value)
+            is FloatValue -> BooleanValue(value.length == other.value.toInt())
+            is StringValue -> BooleanValue(value == other.value)
+            else -> throw AvoRuntimeException("Invalid operands for == comparison: ${this.name()} and ${other.name()}")
         }
 
         override fun name(): String {
@@ -159,27 +273,47 @@ sealed class RuntimeValue {
 
     data class BooleanValue(val value: Boolean) : RuntimeValue() {
         override fun plus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for addition: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for addition: ${this.name()} and ${other.name()}")
         }
 
         override fun minus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for subtraction: ${this.name()} and ${other.name()}")
         }
 
         override fun times(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for multiplication: ${this.name()} and ${other.name()}")
         }
 
         override fun divide(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for division: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for division: ${this.name()} and ${other.name()}")
         }
 
         override fun modulo(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for modulo: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for modulo: ${this.name()} and ${other.name()}")
         }
 
         override fun pow(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Invalid operands for power: ${this.name()} and ${other.name()}")
+            throw AvoRuntimeException("Invalid operands for power: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThan(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Invalid operands for > comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThan(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Invalid operands for < comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Invalid operands for >= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Invalid operands for <= comparison: ${this.name()} and ${other.name()}")
+        }
+
+        override fun equal(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Invalid operands for == comparison: ${this.name()} and ${other.name()}")
         }
 
         override fun name(): String {
@@ -193,27 +327,47 @@ sealed class RuntimeValue {
 
     class VoidValue : RuntimeValue() {
         override fun plus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Void cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Void cannot be part of a mathematical operation")
         }
 
         override fun minus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Void cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Void cannot be part of a mathematical operation")
         }
 
         override fun times(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Void cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Void cannot be part of a mathematical operation")
         }
 
         override fun divide(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Void cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Void cannot be part of a mathematical operation")
         }
 
         override fun modulo(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Void cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Void cannot be part of a mathematical operation")
         }
 
         override fun pow(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Void cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Void cannot be part of a mathematical operation")
+        }
+
+        override fun greaterThan(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Void cannot be part of a comparison")
+        }
+
+        override fun lessThan(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Void cannot be part of a comparison")
+        }
+
+        override fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Void cannot be part of a comparison")
+        }
+
+        override fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Void cannot be part of a comparison")
+        }
+
+        override fun equal(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Void cannot be part of a comparison")
         }
 
         override fun name(): String {
@@ -223,31 +377,52 @@ sealed class RuntimeValue {
 
     data class LambdaValue(val function: Symbol.Function) : RuntimeValue() {
         override fun plus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Lambda cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Lambda cannot be part of a mathematical operation")
         }
 
         override fun minus(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Lambda cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Lambda cannot be part of a mathematical operation")
         }
 
         override fun times(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Lambda cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Lambda cannot be part of a mathematical operation")
         }
 
         override fun divide(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Lambda cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Lambda cannot be part of a mathematical operation")
         }
 
         override fun modulo(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Lambda cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Lambda cannot be part of a mathematical operation")
         }
 
         override fun pow(other: RuntimeValue): RuntimeValue {
-            throw SyntaxException("Lambda cannot be part of a mathematical operation")
+            throw AvoRuntimeException("Lambda cannot be part of a mathematical operation")
+        }
+
+        override fun greaterThan(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Lambda cannot be part of a comparison")
+        }
+
+        override fun lessThan(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Lambda cannot be part of a comparison")
+        }
+
+        override fun greaterThanOrEqualTo(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Lambda cannot be part of a comparison")
+        }
+
+        override fun lessThanOrEqualTo(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Lambda cannot be part of a comparison")
+        }
+
+        override fun equal(other: RuntimeValue): RuntimeValue {
+            throw AvoRuntimeException("Lambda cannot be part of a comparison")
         }
 
         override fun name(): String {
             return "Lambda"
         }
     }
+
 }

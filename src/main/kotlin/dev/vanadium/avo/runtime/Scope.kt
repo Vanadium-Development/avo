@@ -4,8 +4,15 @@ import dev.vanadium.avo.exception.AvoRuntimeException
 import dev.vanadium.avo.syntax.ast.BlockExpressionNode
 import dev.vanadium.avo.syntax.ast.FunctionDefinitionNode
 import dev.vanadium.avo.types.DataType
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.primaryConstructor
 
-data class Scope(@Transient val parent: Scope? = null) {
+data class Scope(
+    @Transient
+    val parent: Scope? = null
+) {
 
     private val symbols = mutableMapOf<String, Symbol>()
 
@@ -100,5 +107,4 @@ data class Scope(@Transient val parent: Scope? = null) {
 
         return parent.getSymbol(identifier)
     }
-
 }

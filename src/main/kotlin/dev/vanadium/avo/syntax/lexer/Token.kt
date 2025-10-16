@@ -99,6 +99,8 @@ enum class TokenType {
 
     @Keyword("void") KW_VOID,
 
+    @Keyword("internal") KW_INTERNAL,
+
     //
     // Symbols
     //
@@ -161,7 +163,10 @@ enum class TokenType {
 
     @CompoundSymbol('<', '=') LESS_EQUAL;
 
-    fun isAdditiveOperation() = (this == PLUS || this == MINUS)
+    fun isAdditiveOperation() =
+        (arrayOf(PLUS, MINUS, GREATER_THAN, LESS_THAN, GREATER_EQUAL, LESS_EQUAL, DOUBLE_EQUALS, NOT_EQUALS).contains(
+            this
+        ))
 
     fun isMultiplicativeOperation() = (this == ASTERISK || this == SLASH || this == CARET || this == PERCENT)
 

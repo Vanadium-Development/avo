@@ -12,7 +12,7 @@ class Interpreter {
     var scopes: Stack<Scope> = Stack()
     val scope get() = scopes.peek()
 
-    private var interpreters: HashMap<KClass<out ExpressionNode>, ExpressionInterpreter<out ExpressionNode>> =
+    private val interpreters: HashMap<KClass<out ExpressionNode>, ExpressionInterpreter<out ExpressionNode>> =
         hashMapOf()
 
     init {
@@ -24,6 +24,8 @@ class Interpreter {
         registerInterpreter<VariableAssignmentNode>(VariableAssignmentInterpreter::class)
         registerInterpreter<VariableDeclarationNode>(VariableDeclarationInterpreter::class)
         registerInterpreter<SymbolReferenceNode>(SymbolReferenceInterpreter::class)
+        registerInterpreter<BlockExpressionNode>(BlockExpressionInterpreter::class)
+        registerInterpreter<ConditionalExpressionNode>(ConditionalExpressionInterpreter::class)
     }
 
     private inline fun <reified T : ExpressionNode> registerInterpreter(clazz: KClass<out ExpressionInterpreter<T>>) {

@@ -107,14 +107,12 @@ class Parser(lexer: Lexer) {
 
     private fun parseExpression(): ExpressionNode {
         var left: ExpressionNode = parseTerm()
-        while (tokenStream.currentToken.type.isAdditiveOperation()) {
-            val op = BinaryOperationType.fromTokenType(tokenStream.currentToken.type)
-                ?: throw SyntaxException("Unknown operation type ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}")
-
+        var op: BinaryOperationType?
+        while (BinaryOperationType.additiveFromTokenType(tokenStream.currentToken.type).also { op = it } != null) {
             tokenStream.consume()
 
             val expr = parseTerm()
-            left = BinaryOperationNode(left, expr, op)
+            left = BinaryOperationNode(left, expr, op!!)
         }
 
         return left
@@ -123,14 +121,14 @@ class Parser(lexer: Lexer) {
     private fun parseTerm(): ExpressionNode {
         var left = parseFactor()
 
-        while (tokenStream.currentToken.type.isMultiplicativeOperation()) {
-            val op = BinaryOperationType.fromTokenType(tokenStream.currentToken.type)
-                ?: throw SyntaxException("Unknown operation type ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}")
-
+        var op: BinaryOperationType?
+        while (BinaryOperationType.multiplicativeFromTokenType(tokenStream.currentToken.type)
+                .also { op = it } != null
+        ) {
             tokenStream.consume()
 
             val expr = parseExpression()
-            left = BinaryOperationNode(left, expr, op)
+            left = BinaryOperationNode(left, expr, op!!)
         }
         return left
     }

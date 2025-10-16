@@ -50,7 +50,7 @@ data class BlockExpressionNode(
 
     @Transient
     val parent: BlockExpressionNode?
-)
+) : ExpressionNode()
 
 data class ConditionalExpressionNode(
     val branches: List<ConditionalExpressionBranch>,
@@ -94,3 +94,9 @@ class ContinueStatementNode : StatementNode()
 
 class BreakStatementNode : StatementNode()
 
+class InternalFunctionDefinitionNode(
+    val classPath: Token,
+    val identifier: Token,
+    val signature: List<FunctionDefinitionNode.FunctionSignatureParameter>,
+    val returnType: DataType
+) : ExpressionNode()

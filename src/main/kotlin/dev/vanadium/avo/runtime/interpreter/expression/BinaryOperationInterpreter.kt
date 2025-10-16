@@ -20,6 +20,11 @@ class BinaryOperationInterpreter(
             BinaryOperationType.DIVIDE -> left.divide(right)
             BinaryOperationType.MODULUS -> left.modulo(right)
             BinaryOperationType.POWER -> left.pow(right)
+            BinaryOperationType.GREATER_THAN -> left.greaterThan(right)
+            BinaryOperationType.LESS_THAN -> left.lessThan(right)
+            BinaryOperationType.GREATER_EQUAL -> left.greaterThanOrEqualTo(right)
+            BinaryOperationType.LESS_EQUAL -> left.lessThanOrEqualTo(right)
+            BinaryOperationType.EQUALS -> left.equal(right)
         }
     }
 

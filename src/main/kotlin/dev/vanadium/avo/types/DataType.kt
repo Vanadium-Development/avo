@@ -1,5 +1,7 @@
 package dev.vanadium.avo.types
 
+import kotlin.reflect.KClassifier
+
 sealed class DataType {
     abstract override fun toString(): String
 

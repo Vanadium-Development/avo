@@ -8,12 +8,26 @@ enum class BinaryOperationType {
     MULTIPLY,
     DIVIDE,
     POWER,
-    MODULUS;
+    MODULUS,
+    GREATER_THAN,
+    LESS_THAN,
+    GREATER_EQUAL,
+    LESS_EQUAL,
+    EQUALS;
 
     companion object {
-        fun fromTokenType(type: TokenType) = when (type) {
+        fun additiveFromTokenType(type: TokenType) = when (type) {
             TokenType.PLUS -> PLUS
             TokenType.MINUS -> MINUS
+            TokenType.LESS_THAN -> LESS_THAN
+            TokenType.GREATER_THAN -> GREATER_THAN
+            TokenType.GREATER_EQUAL -> GREATER_EQUAL
+            TokenType.LESS_EQUAL -> LESS_EQUAL
+            TokenType.DOUBLE_EQUALS -> EQUALS
+            else -> null
+        }
+
+        fun multiplicativeFromTokenType(type: TokenType) = when (type) {
             TokenType.ASTERISK -> MULTIPLY
             TokenType.SLASH -> DIVIDE
             TokenType.PERCENT -> MODULUS

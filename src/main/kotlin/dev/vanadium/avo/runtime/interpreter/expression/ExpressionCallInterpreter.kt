@@ -6,9 +6,6 @@ import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.syntax.ast.ExpressionCallNode
-import dev.vanadium.avo.syntax.ast.ExpressionNode
-import dev.vanadium.avo.syntax.ast.ReturnStatementNode
-import dev.vanadium.avo.types.DataType
 
 class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<ExpressionCallNode>(interpreter) {
     override fun evaluate(node: ExpressionCallNode): RuntimeValue {
@@ -44,24 +41,15 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
             scope.declareVariable(param.first.identifier.value, value.dataType(), value)
         }
 
-        var returnValue: RuntimeValue? = null
+        val returnValue: RuntimeValue = evaluateOther(function.block)
 
-        for (fnNode in function.block.nodes) {
-            if (fnNode is ReturnStatementNode) {
-                returnValue = evaluateOther(fnNode.expression)
-                break
-            }
-            if (fnNode is ExpressionNode) {
-                evaluateOther(fnNode)
-            }
+        if (function.returnType != returnValue.dataType()) {
+            throw AvoRuntimeException("Function ${function.returnType} of type \"\" returns ${returnValue.dataType()} on a control path")
         }
 
         // Leave the function scope
         popScope()
 
-        return returnValue ?: (if (function.returnType is DataType.VoidType) RuntimeValue.VoidValue()
-        else throw AvoRuntimeException(
-            "Function \"${function.name()}\" does not return a value on all paths"
-        ))
+        return returnValue
     }
 }
