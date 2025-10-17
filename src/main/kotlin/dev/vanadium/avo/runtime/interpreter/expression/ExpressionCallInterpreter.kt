@@ -5,11 +5,19 @@ import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
+import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.ExpressionCallNode
 
 class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<ExpressionCallNode>(interpreter) {
-    override fun evaluate(node: ExpressionCallNode): RuntimeValue {
-        val expression = evaluateOther(node.expression)
+    override fun evaluate(node: ExpressionCallNode): ControlFlowResult {
+        val expressionResult = evaluateOther(node.expression)
+
+        if (expressionResult !is ControlFlowResult.Value)
+            throw AvoRuntimeException(
+                "Expression to be called cannot evaluate to a ${expressionResult.name()}"
+            )
+
+        val expression = expressionResult.runtimeValue
 
         if (expression !is RuntimeValue.LambdaValue)
             throw AvoRuntimeException(
@@ -30,7 +38,15 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
 
         val params = function.signature.zip(node.parameters)
         params.forEachIndexed { i, param ->
-            val value = evaluateOther(param.second.expression)
+            val valueResult = evaluateOther(param.second.expression)
+
+            if (valueResult !is ControlFlowResult.Value)
+                throw AvoRuntimeException(
+                    "Function call parameter cannot evaluate to a ${valueResult.name()}"
+                )
+
+            val value = valueResult.runtimeValue
+
             if (param.first.type != value.dataType())
                 throw AvoRuntimeException(
                     "Parameter \"${param.first.identifier.value}\" of function \"${function.name()}\" " +
@@ -41,7 +57,14 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
             scope.declareVariable(param.first.identifier.value, value.dataType(), value)
         }
 
-        val returnValue: RuntimeValue = evaluateOther(function.block)
+        val returnResult: ControlFlowResult = evaluateOther(function.block)
+
+        if (returnResult !is ControlFlowResult.Value)
+            throw AvoRuntimeException(
+                "Call result cannot evaluate to a ${returnResult.name()}"
+            )
+
+        val returnValue = returnResult.runtimeValue
 
         if (function.returnType != returnValue.dataType()) {
             throw AvoRuntimeException("Function ${function.returnType} of type ${function.returnType} returns ${returnValue.dataType()} on a control path")
@@ -50,6 +73,6 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
         // Leave the function scope
         popScope()
 
-        return returnValue
+        return returnResult
     }
 }

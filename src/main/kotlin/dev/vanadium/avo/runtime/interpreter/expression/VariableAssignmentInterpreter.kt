@@ -5,13 +5,22 @@ import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.types.Symbol
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
+import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.VariableAssignmentNode
 
 class VariableAssignmentInterpreter(interpreter: Interpreter) : ExpressionInterpreter<VariableAssignmentNode>(
     interpreter
 ) {
-    override fun evaluate(node: VariableAssignmentNode): RuntimeValue {
-        val expr = evaluateOther(node.value)
+    override fun evaluate(node: VariableAssignmentNode): ControlFlowResult {
+        val exprResult = evaluateOther(node.value)
+
+        if (exprResult !is ControlFlowResult.Value)
+            throw AvoRuntimeException(
+                "Variable assignment value cannot evaluate to a ${exprResult.name()}"
+            )
+
+        val expr = exprResult.runtimeValue
+
         val exprType = expr.dataType()
         val variable = scope.getSymbol(node.identifier.value)
         if (variable !is Symbol.Variable)
@@ -26,6 +35,6 @@ class VariableAssignmentInterpreter(interpreter: Interpreter) : ExpressionInterp
             )
         }
         scope.assignVariable(node.identifier.value, expr)
-        return expr
+        return exprResult
     }
 }

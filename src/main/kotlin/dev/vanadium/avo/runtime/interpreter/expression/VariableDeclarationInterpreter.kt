@@ -4,6 +4,7 @@ import dev.vanadium.avo.exception.AvoRuntimeException
 import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
+import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.VariableDeclarationNode
 import dev.vanadium.avo.types.DataType
 
@@ -31,13 +32,18 @@ class VariableDeclarationInterpreter(interpreter: Interpreter) :
         )
     }
 
-    override fun evaluate(node: VariableDeclarationNode): RuntimeValue {
-        val expr = if (node.value == null) {
-            // If the variable was declared with no value, create a default one
-            node.type.variableDefaultValue()
+    override fun evaluate(node: VariableDeclarationNode): ControlFlowResult {
+        var expr: RuntimeValue
+
+        if (node.value != null) {
+            val exprResult = evaluateOther(node.value)
+            if (exprResult !is ControlFlowResult.Value)
+                throw AvoRuntimeException(
+                    "Variable declaration value cannot evaluate to a ${exprResult.name()}"
+                )
+            expr = exprResult.runtimeValue
         } else {
-            // Is a value is provided, evaluate it
-            evaluateOther(node.value)
+            expr = node.type.variableDefaultValue()
         }
 
         val exprType = expr.dataType()
@@ -53,6 +59,7 @@ class VariableDeclarationInterpreter(interpreter: Interpreter) :
         }
 
         scope.declareVariable(node.identifier.value, node.type, expr)
-        return expr
+
+        return ControlFlowResult.Value(expr)
     }
 }

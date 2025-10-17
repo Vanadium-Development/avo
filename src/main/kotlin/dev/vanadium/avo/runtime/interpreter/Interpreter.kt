@@ -3,6 +3,7 @@ package dev.vanadium.avo.runtime.interpreter
 import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.expression.*
+import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.*
 import java.util.*
 import kotlin.reflect.KClass
@@ -40,7 +41,7 @@ class Interpreter {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun evaluateAny(node: ExpressionNode): RuntimeValue {
+    private fun evaluateAny(node: ExpressionNode): ControlFlowResult {
         var clazz: KClass<out ExpressionNode>? = node::class
         while (clazz != null) {
             val interpreter = interpreters[clazz]
@@ -52,5 +53,5 @@ class Interpreter {
         throw RuntimeException("Could not find interpreter for node \"${node.javaClass.simpleName}\"")
     }
 
-    fun evaluate(node: ExpressionNode): RuntimeValue = evaluateAny(node)
+    fun evaluate(node: ExpressionNode): ControlFlowResult = evaluateAny(node)
 }
