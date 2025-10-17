@@ -1,7 +1,7 @@
 package dev.vanadium.avo.runtime.interpreter.types
 
 import dev.vanadium.avo.exception.AvoRuntimeException
-import dev.vanadium.avo.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.DataType
 import kotlin.math.pow
 
 sealed class RuntimeValue {

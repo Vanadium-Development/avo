@@ -2,7 +2,7 @@ package dev.vanadium.avo.syntax.ast
 
 import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.syntax.lexer.Token
-import dev.vanadium.avo.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.DataType
 
 open class Node
 

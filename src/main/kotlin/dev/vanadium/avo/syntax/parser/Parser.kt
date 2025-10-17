@@ -7,7 +7,7 @@ import dev.vanadium.avo.syntax.lexer.Lexer
 import dev.vanadium.avo.syntax.lexer.Token
 import dev.vanadium.avo.syntax.lexer.TokenStream
 import dev.vanadium.avo.syntax.lexer.TokenType
-import dev.vanadium.avo.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.DataType
 import java.util.*
 
 class Parser(lexer: Lexer) {

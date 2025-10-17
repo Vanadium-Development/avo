@@ -6,7 +6,7 @@ import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.VariableDeclarationNode
-import dev.vanadium.avo.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.DataType
 
 class VariableDeclarationInterpreter(interpreter: Interpreter) :
     ExpressionInterpreter<VariableDeclarationNode>(interpreter) {

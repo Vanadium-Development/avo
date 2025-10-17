@@ -5,7 +5,7 @@ import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.types.Symbol
 import dev.vanadium.avo.syntax.ast.BlockExpressionNode
 import dev.vanadium.avo.syntax.ast.FunctionDefinitionNode
-import dev.vanadium.avo.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.DataType
 
 data class Scope(
     @Transient

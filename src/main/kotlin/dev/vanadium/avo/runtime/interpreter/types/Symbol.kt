@@ -3,7 +3,7 @@ package dev.vanadium.avo.runtime.interpreter.types
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.syntax.ast.BlockExpressionNode
 import dev.vanadium.avo.syntax.ast.FunctionDefinitionNode
-import dev.vanadium.avo.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.DataType
 
 sealed class Symbol {
     data class Function(
