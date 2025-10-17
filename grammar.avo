@@ -1,7 +1,17 @@
-(var f: ? =
-    fun a -> [(string) -> string] {
-        return fun (name: string) -> string {
-            return name + " is very long!"
+(var f: [(int) -> [(string) -> string]] =
+    fun (a: int) -> [(string) -> string] {
+        var i: ? = (fun -> string {
+            return "Ipsum!"
+        })()
+
+        if a > 5 {
+            return fun (name: string) -> string {
+                return name + " " + i
+            }
+        } else {
+            return fun (name: string) -> string {
+                return name + "-" + i
+            }
         }
     }
-)()("Szebon")
+)(6)("Lorem")

@@ -1,5 +1,6 @@
 package dev.vanadium.avo
 
+import com.google.gson.Gson
 import dev.vanadium.avo.logging.DefaultLogger
 import dev.vanadium.avo.logging.Logger
 import dev.vanadium.avo.runtime.interpreter.Interpreter
@@ -53,13 +54,15 @@ class AvoInterpreter(val source: String, val logger: Logger) {
     private val parser = Parser(lexer)
     private val program: ProgramNode = parser.parse()
     private val interpreter = Interpreter()
+    private val gson = Gson().newBuilder().setPrettyPrinting().create()
 
     fun run() {
         program.nodes.forEach f@{
             if (it !is ExpressionNode)
                 return@f
 
-            interpreter.evaluate(it)
+            val expr = interpreter.evaluate(it)
+            println(gson.toJson(expr))
         }
     }
 }

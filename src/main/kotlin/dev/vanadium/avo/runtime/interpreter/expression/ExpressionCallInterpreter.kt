@@ -1,7 +1,7 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
 import dev.vanadium.avo.exception.AvoRuntimeException
-import dev.vanadium.avo.runtime.RuntimeValue
+import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
@@ -44,7 +44,7 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
         val returnValue: RuntimeValue = evaluateOther(function.block)
 
         if (function.returnType != returnValue.dataType()) {
-            throw AvoRuntimeException("Function ${function.returnType} of type \"\" returns ${returnValue.dataType()} on a control path")
+            throw AvoRuntimeException("Function ${function.returnType} of type ${function.returnType} returns ${returnValue.dataType()} on a control path")
         }
 
         // Leave the function scope

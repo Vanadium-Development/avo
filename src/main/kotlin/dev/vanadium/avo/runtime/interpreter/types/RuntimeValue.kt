@@ -1,6 +1,7 @@
-package dev.vanadium.avo.runtime
+package dev.vanadium.avo.runtime.interpreter.types
 
 import dev.vanadium.avo.exception.AvoRuntimeException
+import dev.vanadium.avo.runtime.interpreter.types.Symbol
 import dev.vanadium.avo.types.DataType
 import kotlin.math.pow
 
