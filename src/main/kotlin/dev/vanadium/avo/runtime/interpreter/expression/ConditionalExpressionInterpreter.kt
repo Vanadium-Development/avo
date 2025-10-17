@@ -10,8 +10,8 @@ import dev.vanadium.avo.syntax.ast.ConditionalExpressionNode
 class ConditionalExpressionInterpreter(interpreter: Interpreter) :
     ExpressionInterpreter<ConditionalExpressionNode>(interpreter) {
     override fun evaluate(node: ConditionalExpressionNode): ControlFlowResult {
-        node.branches.firstOrNull f@{
-            val conditionResult = evaluateOther(it.condition)
+        for (branch in node.branches) {
+            val conditionResult = evaluateOther(branch.condition)
 
             if (conditionResult !is ControlFlowResult.Value)
                 throw AvoRuntimeException(
@@ -24,9 +24,9 @@ class ConditionalExpressionInterpreter(interpreter: Interpreter) :
                 throw AvoRuntimeException("Conditional expression must be a boolean value.")
 
             if (!condition.value)
-                return@f false
+                continue
 
-            return evaluateOther(it.block)
+            return evaluateOther(branch.block)
         }
 
         if (node.defaultBranch == null)

@@ -89,6 +89,14 @@ enum class TokenType {
 
     @Keyword("break") KW_BREAK,
 
+    @Keyword("loop") KW_LOOP,
+
+    @Keyword("excl") KW_EXCL,
+
+    @Keyword("incl") KW_INCL,
+
+    @Keyword("step") KW_STEP,
+
     @Keyword("int") KW_INT,
 
     @Keyword("float") KW_FLOAT,
@@ -98,8 +106,6 @@ enum class TokenType {
     @Keyword("bool") KW_BOOL,
 
     @Keyword("void") KW_VOID,
-
-    @Keyword("internal") KW_INTERNAL,
 
     //
     // Symbols

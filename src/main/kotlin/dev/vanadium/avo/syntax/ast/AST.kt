@@ -88,15 +88,21 @@ data class VariableAssignmentNode(val identifier: Token, val value: ExpressionNo
 
 data class SymbolReferenceNode(val identifier: Token) : ExpressionNode()
 
+data class LoopExpressionNode(
+    val start: LoopBound,
+    val end: LoopBound,
+    val step: ExpressionNode,
+    val block: BlockExpressionNode,
+    val loopVariable: Token
+): ExpressionNode() {
+    data class LoopBound(
+        val expression: ExpressionNode,
+        val exclusive: Boolean
+    )
+}
+
 data class ReturnStatementNode(val expression: ExpressionNode) : StatementNode()
 
 class ContinueStatementNode : StatementNode()
 
 class BreakStatementNode : StatementNode()
-
-class InternalFunctionDefinitionNode(
-    val classPath: Token,
-    val identifier: Token,
-    val signature: List<FunctionDefinitionNode.FunctionSignatureParameter>,
-    val returnType: DataType
-) : ExpressionNode()

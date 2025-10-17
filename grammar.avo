@@ -1,17 +1,13 @@
-(var f: [(int) -> [(string) -> string]] =
-    fun (a: int) -> [(string) -> string] {
-        var i: ? = (fun -> string {
-            return "Ipsum!"
-        })()
-
-        if a > 5 {
-            return fun (name: string) -> string {
-                return name + " " + i
-            }
-        } else {
-            return fun (name: string) -> string {
-                return name + "-" + i
-            }
+fun foo -> string {
+    var str: string
+    loop i 0 -> 10 {
+        if i > 3 {
+            str = str + "(" + i + ")"
+            continue
         }
+        str = str + "-Test-"
     }
-)(4)("Lorem")
+    return str
+}
+
+foo()

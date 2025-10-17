@@ -1,5 +1,6 @@
 package dev.vanadium.avo.syntax.parser
 
+import dev.vanadium.avo.exception.AvoRuntimeException
 import dev.vanadium.avo.exception.SyntaxException
 import dev.vanadium.avo.syntax.ast.*
 import dev.vanadium.avo.syntax.lexer.Lexer
@@ -53,14 +54,14 @@ class Parser(lexer: Lexer) {
 
     private fun parseDataType(): DataType {
         val type: DataType? = when (tokenStream.currentToken.type) {
-            TokenType.KW_INT -> DataType.IntegerType
-            TokenType.KW_FLOAT -> DataType.FloatType
-            TokenType.KW_STRING -> DataType.StringType
-            TokenType.KW_BOOL -> DataType.BooleanType
-            TokenType.KW_VOID -> DataType.VoidType
+            TokenType.KW_INT        -> DataType.IntegerType
+            TokenType.KW_FLOAT      -> DataType.FloatType
+            TokenType.KW_STRING     -> DataType.StringType
+            TokenType.KW_BOOL       -> DataType.BooleanType
+            TokenType.KW_VOID       -> DataType.VoidType
             TokenType.QUESTION_MARK -> DataType.InferredType
-            TokenType.IDENTIFIER -> DataType.ComplexType(tokenStream.currentToken.value)
-            else -> null
+            TokenType.IDENTIFIER    -> DataType.ComplexType(tokenStream.currentToken.value)
+            else                    -> null
         }
 
         if (type != null) {
@@ -78,10 +79,10 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseStatement(): StatementNode? = when (tokenStream.currentToken.type) {
-        TokenType.KW_RETURN -> parseReturnStatement()
+        TokenType.KW_RETURN   -> parseReturnStatement()
         TokenType.KW_CONTINUE -> parseContinueStatement()
-        TokenType.KW_BREAK -> parseBreakStatement()
-        else -> null
+        TokenType.KW_BREAK    -> parseBreakStatement()
+        else                  -> null
     }
 
     private fun parseReturnStatement(): ReturnStatementNode {
@@ -165,12 +166,12 @@ class Parser(lexer: Lexer) {
 
     private fun parseFactor(): ExpressionNode {
         var factor: ExpressionNode? = when (tokenStream.currentToken.type) {
-            TokenType.FLOAT_LITERAL -> LiteralNode.FloatLiteral(tokenStream.currentToken.value.toDouble())
+            TokenType.FLOAT_LITERAL   -> LiteralNode.FloatLiteral(tokenStream.currentToken.value.toDouble())
             TokenType.INTEGER_LITERAL -> LiteralNode.IntegerLiteral(tokenStream.currentToken.value.toInt())
-            TokenType.STRING_LITERAL -> LiteralNode.StringLiteral(tokenStream.currentToken.value)
-            TokenType.KW_TRUE -> LiteralNode.BooleanLiteral(true)
-            TokenType.KW_FALSE -> LiteralNode.BooleanLiteral(false)
-            else -> null
+            TokenType.STRING_LITERAL  -> LiteralNode.StringLiteral(tokenStream.currentToken.value)
+            TokenType.KW_TRUE         -> LiteralNode.BooleanLiteral(true)
+            TokenType.KW_FALSE        -> LiteralNode.BooleanLiteral(false)
+            else                      -> null
         }
 
         if (factor != null) {
@@ -179,18 +180,19 @@ class Parser(lexer: Lexer) {
 
         if (factor == null) {
             factor = when (tokenStream.currentToken.type) {
-                TokenType.KW_VAR -> parseVariableDeclaration()
-                TokenType.KW_IF -> parseConditionalExpression()
-                TokenType.KW_FUN -> parseFunctionDefinition()
-                TokenType.LPAREN -> parseSubExpression()
-                else -> null
+                TokenType.KW_VAR  -> parseVariableDeclaration()
+                TokenType.KW_IF   -> parseConditionalExpression()
+                TokenType.KW_LOOP -> parseLoopExpression()
+                TokenType.KW_FUN  -> parseFunctionDefinition()
+                TokenType.LPAREN  -> parseSubExpression()
+                else              -> null
             }
         }
 
         if (factor == null && tokenStream.currentToken.type == TokenType.IDENTIFIER) {
             factor = when (tokenStream.nextToken.type) {
                 TokenType.EQUALS -> parseVariableAssignment()
-                else -> parseVariableReference()
+                else             -> parseVariableReference()
             }
         }
 
@@ -489,6 +491,72 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return parameters
+    }
+
+    private fun parseLoopBound(): LoopExpressionNode.LoopBound {
+        val exclusive: Boolean
+
+        when (tokenStream.currentToken.type) {
+            TokenType.KW_EXCL -> {
+                exclusive = true
+                tokenStream.consume()
+            }
+
+            TokenType.KW_INCL -> {
+                exclusive = false
+                tokenStream.consume()
+            }
+
+            else              -> {
+                exclusive = false
+            }
+        }
+
+        val expr = parseExpression()
+
+        return LoopExpressionNode.LoopBound(expr, exclusive)
+    }
+
+    private fun parseLoopExpression(): LoopExpressionNode {
+        if (tokenStream.currentToken.type != TokenType.KW_LOOP)
+            throw AvoRuntimeException(
+                "Expected 'loop', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
+
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw AvoRuntimeException(
+                "Expected variable identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        val loopVarIdentifier = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        val from = parseLoopBound()
+
+        if (tokenStream.currentToken.type != TokenType.RIGHT_ARROW)
+            throw AvoRuntimeException(
+                "Expected '->', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}"
+            )
+
+        tokenStream.consume()
+
+        val to = parseLoopBound()
+
+        val step: ExpressionNode
+
+        if (tokenStream.currentToken.type == TokenType.KW_STEP) {
+            tokenStream.consume()
+            step = parseExpression()
+        } else {
+            step = LiteralNode.IntegerLiteral(1)
+        }
+
+        val block = parseBlockExpression()
+
+        return LoopExpressionNode(from, to, step, block, loopVarIdentifier)
     }
 
 }

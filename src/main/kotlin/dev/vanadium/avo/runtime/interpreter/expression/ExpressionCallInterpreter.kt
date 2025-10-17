@@ -1,11 +1,11 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
 import dev.vanadium.avo.exception.AvoRuntimeException
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
+import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.syntax.ast.ExpressionCallNode
 
 class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<ExpressionCallNode>(interpreter) {
@@ -29,7 +29,7 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
         if (function.signature.size != node.parameters.size)
             throw AvoRuntimeException(
                 "Function \"${function.name()}\" expected ${function.signature.size} parameters, but " +
-                        "received ${node.parameters.size}"
+                "received ${node.parameters.size}"
             )
 
         // The usable function scope is a new child scope of the captured scope
@@ -50,7 +50,7 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
             if (param.first.type != value.dataType())
                 throw AvoRuntimeException(
                     "Parameter \"${param.first.identifier.value}\" of function \"${function.name()}\" " +
-                            "is declared with type $value but received ${param.first.type}"
+                    "is declared with type $value but received ${param.first.type}"
                 )
 
             // Declare signature variables in the function scope
@@ -61,7 +61,7 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
 
         if (returnResult !is ControlFlowResult.Value)
             throw AvoRuntimeException(
-                "Call result cannot evaluate to a ${returnResult.name()}"
+                "Unexpected ${returnResult.name()} in Function"
             )
 
         val returnValue = returnResult.runtimeValue

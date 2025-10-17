@@ -26,6 +26,7 @@ class Interpreter {
         registerInterpreter<VariableDeclarationNode>(VariableDeclarationInterpreter::class)
         registerInterpreter<SymbolReferenceNode>(SymbolReferenceInterpreter::class)
         registerInterpreter<BlockExpressionNode>(BlockExpressionInterpreter::class)
+        registerInterpreter<LoopExpressionNode>(LoopExpressionInterpreter::class)
         registerInterpreter<ConditionalExpressionNode>(ConditionalExpressionInterpreter::class)
     }
 
