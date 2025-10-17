@@ -142,7 +142,7 @@ class Parser(lexer: Lexer) {
         ) {
             tokenStream.consume()
 
-            val expr = parseExpression()
+            val expr = parseFactor()
             left = BinaryOperationNode(left, expr, op!!)
         }
         return left

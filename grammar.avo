@@ -1,7 +1,7 @@
 fun foo -> string {
     var str: string
     loop i 0 -> 10 {
-        if i > 3 {
+        if i % 2 == 0 {
             str = str + "(" + i + ")"
             continue
         }
