@@ -1,11 +1,10 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
-import dev.vanadium.avo.exception.AvoRuntimeException
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
-import dev.vanadium.avo.runtime.interpreter.types.Symbol
+import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
+import dev.vanadium.avo.runtime.interpreter.types.Symbol
 import dev.vanadium.avo.syntax.ast.VariableAssignmentNode
 
 class VariableAssignmentInterpreter(interpreter: Interpreter) : ExpressionInterpreter<VariableAssignmentNode>(
@@ -15,26 +14,29 @@ class VariableAssignmentInterpreter(interpreter: Interpreter) : ExpressionInterp
         val exprResult = evaluateOther(node.value)
 
         if (exprResult !is ControlFlowResult.Value)
-            throw AvoRuntimeException(
-                "Variable assignment value cannot evaluate to a ${exprResult.name()}"
+            throw RuntimeError(
+                "Variable assignment value cannot evaluate to a ${exprResult.name()}",
+                node.line
             )
 
         val expr = exprResult.runtimeValue
 
         val exprType = expr.dataType()
-        val variable = scope.getSymbol(node.identifier.value)
+        val variable = scope.getSymbol(node.identifier.value, node.line)
         if (variable !is Symbol.Variable)
-            throw AvoRuntimeException(
-                "Symbol \"${node.identifier.value}\" is not a variable"
+            throw RuntimeError(
+                "Symbol \"${node.identifier.value}\" is not a variable",
+                node.line
             )
 
         if (exprType != variable.type) {
-            throw AvoRuntimeException(
+            throw RuntimeError(
                 "Cannot assign expression of type $exprType " +
-                        "to variable \"${node.identifier.value}\" of type ${variable.type}"
+                "to variable \"${node.identifier.value}\" of type ${variable.type}",
+                node.line
             )
         }
-        scope.assignVariable(node.identifier.value, expr)
+        scope.assignVariable(node.identifier.value, expr, node.line)
         return exprResult
     }
 }

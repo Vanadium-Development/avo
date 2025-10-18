@@ -1,11 +1,11 @@
 package dev.vanadium.avo.runtime
 
-import dev.vanadium.avo.exception.AvoRuntimeException
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
+import dev.vanadium.avo.error.RuntimeError
+import dev.vanadium.avo.runtime.interpreter.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.types.Symbol
 import dev.vanadium.avo.syntax.ast.BlockExpressionNode
 import dev.vanadium.avo.syntax.ast.FunctionDefinitionNode
-import dev.vanadium.avo.runtime.interpreter.types.DataType
 
 data class Scope(
     @Transient
@@ -24,9 +24,17 @@ data class Scope(
      * Create a variable in the current scope.
      * This will fail if the identifier is already in use.
      */
-    fun declareVariable(identifier: String, type: DataType, expression: RuntimeValue) {
+    fun declareVariable(
+        identifier: String,
+        type: DataType,
+        expression: RuntimeValue,
+        line: Int
+    ) {
         if (isIdentifierTaken(identifier)) {
-            throw AvoRuntimeException("Duplicate identifier: $identifier")
+            throw RuntimeError(
+                "Duplicate identifier: $identifier",
+                line
+            )
         }
         symbols[identifier] = Symbol.Variable(this, expression, type)
     }
@@ -35,20 +43,30 @@ data class Scope(
      * Set the value of an existing variable in the current scope or one of the parent scopes.
      * This will fail if the variable is not found.
      */
-    fun assignVariable(identifier: String, expression: RuntimeValue) {
+    fun assignVariable(
+        identifier: String,
+        expression: RuntimeValue,
+        line: Int,
+    ) {
         if (symbols.containsKey(identifier)) {
             if (symbols[identifier] !is Symbol.Variable)
-                throw AvoRuntimeException("Symbol is not a variable: $identifier")
+                throw RuntimeError(
+                    "Symbol is not a variable: $identifier",
+                    line
+                )
 
             (symbols[identifier] as Symbol.Variable).value = expression
             return
         }
 
         if (parent == null) {
-            throw AvoRuntimeException("Undefined variable: $identifier")
+            throw RuntimeError(
+                "Undefined variable: $identifier",
+                line
+            )
         }
 
-        parent.assignVariable(identifier, expression)
+        parent.assignVariable(identifier, expression, line)
     }
 
     /**
@@ -72,7 +90,8 @@ data class Scope(
         identifier: String?,
         signature: List<FunctionDefinitionNode.FunctionSignatureParameter>,
         returnType: DataType,
-        block: BlockExpressionNode
+        block: BlockExpressionNode,
+        line: Int
     ): Symbol.Function {
         // Anonymous Function
         if (identifier == null) {
@@ -80,7 +99,10 @@ data class Scope(
         }
 
         if (isIdentifierTaken(identifier)) {
-            throw AvoRuntimeException("Duplicate function with identifier $identifier")
+            throw RuntimeError(
+                "Duplicate function with identifier $identifier",
+                line
+            )
         }
 
         symbols[identifier] = Symbol.Function(this, identifier, signature, returnType, block)
@@ -94,15 +116,21 @@ data class Scope(
      * Get a symbol from the current or the parent scopes.
      * This will fail if the symbol cannot be found.
      */
-    fun getSymbol(identifier: String): Symbol {
+    fun getSymbol(
+        identifier: String,
+        line: Int
+    ): Symbol {
         val symbol = symbols[identifier]
         if (symbol != null) {
             return symbol
         }
 
         if (parent == null)
-            throw AvoRuntimeException("Undefined symbol: $identifier")
+            throw RuntimeError(
+                "Undefined symbol: $identifier",
+                line
+            )
 
-        return parent.getSymbol(identifier)
+        return parent.getSymbol(identifier, line)
     }
 }

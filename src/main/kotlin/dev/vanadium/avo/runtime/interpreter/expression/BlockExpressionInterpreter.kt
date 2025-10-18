@@ -1,10 +1,10 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
-import dev.vanadium.avo.exception.AvoRuntimeException
+import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
+import dev.vanadium.avo.runtime.interpreter.types.value.VoidValue
 import dev.vanadium.avo.syntax.ast.*
 
 class BlockExpressionInterpreter(interpreter: Interpreter) : ExpressionInterpreter<BlockExpressionNode>(interpreter) {
@@ -16,8 +16,9 @@ class BlockExpressionInterpreter(interpreter: Interpreter) : ExpressionInterpret
                 is ContinueStatementNode -> return ControlFlowResult.Continue()
                 is BreakStatementNode    -> return ControlFlowResult.Break()
                 is ExpressionNode        -> evaluateOther(blockNode)
-                else                     -> throw AvoRuntimeException(
-                    "Unexpected node in block: ${blockNode.javaClass.simpleName}"
+                else                     -> throw RuntimeError(
+                    "Unexpected node in block: ${blockNode.javaClass.simpleName}",
+                    blockNode.line
                 )
             }
 
@@ -25,7 +26,7 @@ class BlockExpressionInterpreter(interpreter: Interpreter) : ExpressionInterpret
                 return expr
             }
         }
-        return ControlFlowResult.Value(RuntimeValue.VoidValue())
+        return ControlFlowResult.Value(VoidValue())
     }
 
 }

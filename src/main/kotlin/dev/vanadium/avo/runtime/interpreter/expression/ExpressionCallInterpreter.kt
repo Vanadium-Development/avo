@@ -1,11 +1,11 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
-import dev.vanadium.avo.exception.AvoRuntimeException
+import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
+import dev.vanadium.avo.runtime.interpreter.types.value.LambdaValue
 import dev.vanadium.avo.syntax.ast.ExpressionCallNode
 
 class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterpreter<ExpressionCallNode>(interpreter) {
@@ -13,23 +13,26 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
         val expressionResult = evaluateOther(node.expression)
 
         if (expressionResult !is ControlFlowResult.Value)
-            throw AvoRuntimeException(
-                "Expression to be called cannot evaluate to a ${expressionResult.name()}"
+            throw RuntimeError(
+                "Expression to be called cannot evaluate to a ${expressionResult.name()}",
+                node.line
             )
 
         val expression = expressionResult.runtimeValue
 
-        if (expression !is RuntimeValue.LambdaValue)
-            throw AvoRuntimeException(
-                "Expression is not callable"
+        if (expression !is LambdaValue)
+            throw RuntimeError(
+                "Expression is not callable",
+                node.line
             )
 
         val function = expression.function
 
         if (function.signature.size != node.parameters.size)
-            throw AvoRuntimeException(
+            throw RuntimeError(
                 "Function \"${function.name()}\" expected ${function.signature.size} parameters, but " +
-                "received ${node.parameters.size}"
+                "received ${node.parameters.size}",
+                node.line
             )
 
         // The usable function scope is a new child scope of the captured scope
@@ -41,33 +44,39 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
             val valueResult = evaluateOther(param.second.expression)
 
             if (valueResult !is ControlFlowResult.Value)
-                throw AvoRuntimeException(
-                    "Function call parameter cannot evaluate to a ${valueResult.name()}"
+                throw RuntimeError(
+                    "Function call parameter cannot evaluate to a ${valueResult.name()}",
+                    node.line
                 )
 
             val value = valueResult.runtimeValue
 
             if (param.first.type != value.dataType())
-                throw AvoRuntimeException(
+                throw RuntimeError(
                     "Parameter \"${param.first.identifier.value}\" of function \"${function.name()}\" " +
-                    "is declared with type $value but received ${param.first.type}"
+                    "is declared with type $value but received ${param.first.type}",
+                    node.line
                 )
 
             // Declare signature variables in the function scope
-            scope.declareVariable(param.first.identifier.value, value.dataType(), value)
+            scope.declareVariable(param.first.identifier.value, value.dataType(), value, node.line)
         }
 
         val returnResult: ControlFlowResult = evaluateOther(function.block)
 
         if (returnResult !is ControlFlowResult.Value)
-            throw AvoRuntimeException(
-                "Unexpected ${returnResult.name()} in Function"
+            throw RuntimeError(
+                "Unexpected ${returnResult.name()} in Function",
+                function.block.line
             )
 
         val returnValue = returnResult.runtimeValue
 
         if (function.returnType != returnValue.dataType()) {
-            throw AvoRuntimeException("Function ${function.returnType} of type ${function.returnType} returns ${returnValue.dataType()} on a control path")
+            throw RuntimeError(
+                "Function ${function.returnType} of type ${function.returnType} returns ${returnValue.dataType()} on a control path",
+                function.block.line
+            )
         }
 
         // Leave the function scope

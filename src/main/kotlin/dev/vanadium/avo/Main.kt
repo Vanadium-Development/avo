@@ -1,7 +1,15 @@
 package dev.vanadium.avo
 
+import dev.vanadium.avo.error.handler.MordantErrorHandler
+
 fun main() {
-    Avo {
+    Interpreter {
         sourcePath { "grammar.avo" }
-    }.run()
+        errorHandling {
+            exitOnError()
+            handlerImplementation { MordantErrorHandler }
+        }
+    }.exists {
+        run()
+    }
 }

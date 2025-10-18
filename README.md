@@ -10,15 +10,15 @@
 fun foo -> string {
     var str: string
     loop i 0 -> 10 {
-        if i == 5 {
-            str = str + "? "
-            continue
-        }
-        if i > 8 {
-            break
-        }
-        str = str + i + " "
+    if i == 5 {
+        str = str + "? "
+        continue
     }
+    if i > 8 {
+        break
+    }
+    str = str + i + " "
+}
     return str
 }
 

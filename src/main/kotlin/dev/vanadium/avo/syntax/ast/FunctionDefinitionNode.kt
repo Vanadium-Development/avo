@@ -1,0 +1,19 @@
+package dev.vanadium.avo.syntax.ast
+
+import dev.vanadium.avo.runtime.interpreter.types.DataType
+import dev.vanadium.avo.syntax.lexer.Token
+
+data class FunctionDefinitionNode(
+    @Transient
+    override val line: Int,
+    val identifier: Token,
+    val anonymous: Boolean,
+    val parameters: List<FunctionSignatureParameter>,
+    val returnType: DataType,
+    val block: BlockExpressionNode
+) : ExpressionNode(line) {
+    data class FunctionSignatureParameter(
+        val identifier: Token,
+        val type: DataType
+    )
+}

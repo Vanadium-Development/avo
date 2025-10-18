@@ -1,8 +1,9 @@
 package dev.vanadium.avo
 
 import com.google.gson.Gson
-import dev.vanadium.avo.logging.DefaultLogger
-import dev.vanadium.avo.logging.Logger
+import dev.vanadium.avo.error.BaseError
+import dev.vanadium.avo.error.SourceError
+import dev.vanadium.avo.error.handler.ErrorHandlingConfig
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.syntax.ast.ExpressionNode
 import dev.vanadium.avo.syntax.ast.ProgramNode
@@ -12,27 +13,26 @@ import java.io.File
 
 class AvoInterpreterBuilder {
     private var sourceCode: String? = null
-    private var loggerImpl: Logger = DefaultLogger.NoLogger
 
     val source get() = sourceCode
-    val logger get() = loggerImpl
 
-    fun logger(logger: () -> Logger) {
-        this.loggerImpl = logger()
+    fun errorHandling(config: ErrorHandlingConfig.() -> Unit) {
+        config(ErrorHandlingConfig)
     }
 
     fun sourceFile(sourceFile: () -> File) {
         val file = sourceFile()
         if (!file.exists())
-            throw RuntimeException("Source file does not exist: ${file.path}")
+            throw SourceError("Source file does not exist", file.path)
 
         sourceCode = file.readText(Charsets.UTF_8)
     }
 
     fun sourcePath(sourcePath: () -> String) {
-        val file = File(sourcePath())
+        val path = sourcePath()
+        val file = File(path)
         if (!file.exists())
-            throw RuntimeException("Source file does not exist: $sourcePath")
+            throw SourceError("Source file does not exist", path)
 
         sourceCode = file.readText(Charsets.UTF_8)
     }
@@ -42,27 +42,56 @@ class AvoInterpreterBuilder {
     }
 }
 
-fun Avo(block: AvoInterpreterBuilder.() -> Unit): AvoInterpreter {
+fun Interpreter(block: AvoInterpreterBuilder.() -> Unit): AvoInterpreter? {
     val builder = AvoInterpreterBuilder()
-    builder.block()
-    val src = builder.source ?: throw RuntimeException("No source set")
-    return AvoInterpreter(src, builder.logger)
+    try {
+        builder.block()
+    } catch (e: BaseError) {
+        ErrorHandlingConfig.handler.dispatch(e)
+        return null
+    }
+    val src = builder.source ?: throw SourceError("No source set", "N/A")
+    return AvoInterpreter(src)
 }
 
-class AvoInterpreter(val source: String, val logger: Logger) {
+class AvoInterpreter(
+    source: String
+) {
     private val lexer = Lexer(source)
     private val parser = Parser(lexer)
     private val program: ProgramNode = parser.parse()
     private val interpreter = Interpreter()
     private val gson = Gson().newBuilder().setPrettyPrinting().create()
 
-    fun run() {
-        program.nodes.forEach f@{
-            if (it !is ExpressionNode)
-                return@f
+    val errorHandler get() = ErrorHandlingConfig.handler
 
-            val expr = interpreter.evaluate(it)
-            println(gson.toJson(expr))
+    fun run() {
+        try {
+            program.nodes.forEach f@{
+                if (it !is ExpressionNode)
+                    return@f
+
+                val expr = interpreter.evaluate(it)
+                println(gson.toJson(expr))
+            }
+        } catch (e: BaseError) {
+            errorHandler.dispatch(e)
         }
     }
+}
+
+fun AvoInterpreter?.exists(fn: AvoInterpreter.() -> Unit): AvoInterpreter? {
+    if (this == null)
+        return this
+
+    fn(this)
+    return this
+}
+
+fun AvoInterpreter?.notExists(fn: () -> Unit): AvoInterpreter? {
+    if (this != null)
+        return this
+
+    fn()
+    return this
 }

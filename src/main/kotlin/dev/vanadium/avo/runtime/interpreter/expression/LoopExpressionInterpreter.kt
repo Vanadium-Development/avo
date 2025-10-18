@@ -1,13 +1,15 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
-import dev.vanadium.avo.exception.AvoRuntimeException
+import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
-import dev.vanadium.avo.syntax.ast.LoopExpressionNode
 import dev.vanadium.avo.runtime.interpreter.types.DataType
+import dev.vanadium.avo.runtime.interpreter.types.value.IntegerValue
+import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
+import dev.vanadium.avo.runtime.interpreter.types.value.VoidValue
+import dev.vanadium.avo.syntax.ast.LoopExpressionNode
 
 class LoopExpressionInterpreter(interpreter: Interpreter) : ExpressionInterpreter<LoopExpressionNode>(interpreter) {
     override fun evaluate(node: LoopExpressionNode): ControlFlowResult {
@@ -16,60 +18,68 @@ class LoopExpressionInterpreter(interpreter: Interpreter) : ExpressionInterprete
         val stepSizeResult = evaluateOther(node.step)
 
         if (lowerBoundResult !is ControlFlowResult.Value)
-            throw AvoRuntimeException(
-                "Lower bound of loop cannot evaluate to ${lowerBoundResult.name()}"
+            throw RuntimeError(
+                "Lower bound of loop cannot evaluate to ${lowerBoundResult.name()}",
+                node.line
             )
 
         if (upperBoundResult !is ControlFlowResult.Value)
-            throw AvoRuntimeException(
-                "Upper bound of loop cannot evaluate to ${upperBoundResult.name()}"
+            throw RuntimeError(
+                "Upper bound of loop cannot evaluate to ${upperBoundResult.name()}",
+                node.line
             )
 
         if (stepSizeResult !is ControlFlowResult.Value)
-            throw AvoRuntimeException(
-                "Step size of loop cannot evaluate to ${stepSizeResult.name()}"
+            throw RuntimeError(
+                "Step size of loop cannot evaluate to ${stepSizeResult.name()}",
+                node.line
             )
 
         val lowerBound = lowerBoundResult.runtimeValue
 
         if (lowerBound.dataType() != DataType.IntegerType)
-            throw AvoRuntimeException(
-                "Lower bound of loop is an integer: ${lowerBound.dataType()}"
+            throw RuntimeError(
+                "Lower bound of loop is an integer: ${lowerBound.dataType()}",
+                node.line
             )
 
         val upperBound = upperBoundResult.runtimeValue
 
         if (upperBound.dataType() != DataType.IntegerType)
-            throw AvoRuntimeException(
-                "Upper bound of loop is not an integer: ${upperBound.dataType()}"
+            throw RuntimeError(
+                "Upper bound of loop is not an integer: ${upperBound.dataType()}",
+                node.line
             )
 
         val stepSize = stepSizeResult.runtimeValue
 
         if (stepSize.dataType() != DataType.IntegerType)
-            throw AvoRuntimeException(
-                "Step size of loop is not an integer: ${stepSize.dataType()}"
+            throw RuntimeError(
+                "Step size of loop is not an integer: ${stepSize.dataType()}",
+                node.line
             )
 
-        val start = (lowerBound as RuntimeValue.IntegerValue).value
-        val end = (upperBound as RuntimeValue.IntegerValue).value
-        val stepInt = (stepSize as RuntimeValue.IntegerValue).value
+        val start = (lowerBound as IntegerValue).value
+        val end = (upperBound as IntegerValue).value
+        val stepInt = (stepSize as IntegerValue).value
 
         if (start > end)
-            throw AvoRuntimeException(
-                "Upper loop bound must be greater than the lower bound: $start -> $end"
+            throw RuntimeError(
+                "Upper loop bound must be greater than the lower bound: $start -> $end",
+                node.line
             )
 
         if (stepInt <= 0)
-            throw AvoRuntimeException(
-                "Step size of loop must be > 0, got $stepInt"
+            throw RuntimeError(
+                "Step size of loop must be > 0, got $stepInt",
+                node.line
             )
 
         val actualStart = if (node.start.exclusive) start + 1 else start
         val actualEnd = if (node.end.exclusive) end - 1 else end
         val loop = actualStart..actualEnd step stepInt
 
-        var returnValue: RuntimeValue = RuntimeValue.VoidValue()
+        var returnValue: RuntimeValue = VoidValue()
 
         for (i in loop) {
             val loopScope = Scope(scope)
@@ -78,7 +88,8 @@ class LoopExpressionInterpreter(interpreter: Interpreter) : ExpressionInterprete
             scope.declareVariable(
                 node.loopVariable.value,
                 DataType.IntegerType,
-                RuntimeValue.IntegerValue(i)
+                IntegerValue(i),
+                node.line
             )
 
             val result = evaluateOther(node.block)

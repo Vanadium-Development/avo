@@ -1,6 +1,5 @@
 package dev.vanadium.avo.runtime.interpreter
 
-import dev.vanadium.avo.runtime.interpreter.types.RuntimeValue
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.ExpressionNode

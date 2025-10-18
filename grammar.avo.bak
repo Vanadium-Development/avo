@@ -1,0 +1,7 @@
+fun foo -> string {
+    if true {
+        continue
+    }
+}
+
+foo()

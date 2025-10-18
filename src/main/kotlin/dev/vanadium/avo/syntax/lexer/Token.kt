@@ -2,7 +2,10 @@ package dev.vanadium.avo.syntax.lexer
 
 annotation class Symbol(val value: Char)
 
-annotation class CompoundSymbol(val first: Char, val second: Char)
+annotation class CompoundSymbol(
+    val first: Char,
+    val second: Char
+)
 
 annotation class Keyword(val value: String)
 
@@ -178,7 +181,11 @@ enum class TokenType {
 
 }
 
-data class Token(val value: String, val type: TokenType, val line: Int) {
+data class Token(
+    val value: String,
+    val type: TokenType,
+    val line: Int
+) {
     companion object {
         fun eof(): Token = Token("", TokenType.EOF, 0)
     }

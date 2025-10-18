@@ -1,6 +1,6 @@
 package dev.vanadium.avo.syntax.lexer
 
-import dev.vanadium.avo.exception.LexerException
+import dev.vanadium.avo.error.LexerException
 
 fun Char.isIdentifierChar(): Boolean {
     return isLetter() || this == '_'
@@ -44,10 +44,10 @@ class Lexer(val input: String) {
     }
 
     private fun Char.classify(currentType: TokenType): TokenType = when {
-        isWhitespace() -> TokenType.UNDEFINED
-        isDigit() -> if (currentType == TokenType.FLOAT_LITERAL) TokenType.FLOAT_LITERAL else TokenType.INTEGER_LITERAL
+        isWhitespace()     -> TokenType.UNDEFINED
+        isDigit()          -> if (currentType == TokenType.FLOAT_LITERAL) TokenType.FLOAT_LITERAL else TokenType.INTEGER_LITERAL
         isIdentifierChar() -> TokenType.IDENTIFIER
-        else -> TokenType.GENERIC_SYMBOL
+        else               -> TokenType.GENERIC_SYMBOL
     }
 
     fun nextToken(): Token {

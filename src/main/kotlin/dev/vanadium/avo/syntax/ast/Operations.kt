@@ -17,22 +17,22 @@ enum class BinaryOperationType {
 
     companion object {
         fun additiveFromTokenType(type: TokenType) = when (type) {
-            TokenType.PLUS -> PLUS
-            TokenType.MINUS -> MINUS
-            TokenType.LESS_THAN -> LESS_THAN
-            TokenType.GREATER_THAN -> GREATER_THAN
+            TokenType.PLUS          -> PLUS
+            TokenType.MINUS         -> MINUS
+            TokenType.LESS_THAN     -> LESS_THAN
+            TokenType.GREATER_THAN  -> GREATER_THAN
             TokenType.GREATER_EQUAL -> GREATER_EQUAL
-            TokenType.LESS_EQUAL -> LESS_EQUAL
+            TokenType.LESS_EQUAL    -> LESS_EQUAL
             TokenType.DOUBLE_EQUALS -> EQUALS
-            else -> null
+            else                    -> null
         }
 
         fun multiplicativeFromTokenType(type: TokenType) = when (type) {
             TokenType.ASTERISK -> MULTIPLY
-            TokenType.SLASH -> DIVIDE
-            TokenType.PERCENT -> MODULUS
-            TokenType.CARET -> POWER
-            else -> null
+            TokenType.SLASH    -> DIVIDE
+            TokenType.PERCENT  -> MODULUS
+            TokenType.CARET    -> POWER
+            else               -> null
         }
     }
 
