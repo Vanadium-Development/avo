@@ -1,4 +1,8 @@
-# Vanadium Avo
+# Vanadium&reg; Avo&trade;
+
+![Image](logo/full/avo_full.png)
+
+---
 
 ### Syntax Sample
 
