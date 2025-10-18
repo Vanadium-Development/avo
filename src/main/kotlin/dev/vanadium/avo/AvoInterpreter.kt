@@ -59,11 +59,19 @@ class AvoInterpreter(
 ) {
     private val lexer = Lexer(source)
     private val parser = Parser(lexer)
-    private val program: ProgramNode = parser.parse()
+    private lateinit var program: ProgramNode
     private val interpreter = Interpreter()
     private val gson = Gson().newBuilder().setPrettyPrinting().create()
 
     val errorHandler get() = ErrorHandlingConfig.handler
+
+    init {
+        try {
+            program = parser.parse()
+        } catch (e: BaseError) {
+            ErrorHandlingConfig.handler.dispatch(e)
+        }
+    }
 
     fun run() {
         try {
