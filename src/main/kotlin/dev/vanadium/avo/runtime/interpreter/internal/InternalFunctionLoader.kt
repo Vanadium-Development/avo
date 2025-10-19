@@ -2,7 +2,7 @@ package dev.vanadium.avo.runtime.interpreter.internal
 
 import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.interpreter.types.KTypeMappable
-import dev.vanadium.avo.runtime.interpreter.types.value.KValueMappable
+import dev.vanadium.avo.runtime.interpreter.types.value.KotlinMappable
 import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.types.value.VoidValue
 import kotlin.reflect.KClass
@@ -35,7 +35,7 @@ class InternalFunctionLoader {
             )
 
         parameters.forEachIndexed { index, param ->
-            if (param.dataType() !is KTypeMappable || param !is KValueMappable)
+            if (param !is KotlinMappable)
                 throw RuntimeError(
                     "Parameter ${index + 1} in call to internal function \"$identifier\" is not Kotlin-mappable.",
                     line
@@ -52,7 +52,7 @@ class InternalFunctionLoader {
                 fn.name == identifier &&
                 fn.parameters.drop(1)
                     .map { p -> p.type } == parameters.map { p ->
-                    (p.dataType() as KTypeMappable).toKType()
+                    (p as KotlinMappable).toKotlinType()
                 }
             }
             if (f.isEmpty())
@@ -73,12 +73,8 @@ class InternalFunctionLoader {
                 line
             )
 
-        // TODO Check if return type is kotlin-mappable
-        // TODO Find a nicer way to implement kotlin mapping
-
         val returnValue = function.call(instance, *(parameters.map {
-            val kValue = (it as KValueMappable).toKotlinValue()
-            kValue
+            (it as KotlinMappable).toKotlinValue()
         }.toTypedArray()))
         if (returnValue == null) {
             return VoidValue()

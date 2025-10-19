@@ -1,5 +1,6 @@
 package dev.vanadium.avo.runtime.interpreter.types
 
+import dev.vanadium.avo.error.RuntimeError
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
@@ -7,11 +8,14 @@ interface KTypeMappable {
     fun toKType(): KType
 }
 
-sealed class DataType {
+sealed class DataType : KTypeMappable {
     abstract override fun toString(): String
 
     object InferredType : DataType() {
         override fun toString() = "Inferred"
+        override fun toKType(): KType {
+            throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
+        }
     }
 
     object IntegerType : DataType(), KTypeMappable {
@@ -19,7 +23,7 @@ sealed class DataType {
         override fun toKType(): KType = Int::class.createType()
     }
 
-    object FloatType : DataType(), KTypeMappable{
+    object FloatType : DataType(), KTypeMappable {
         override fun toString() = "Float"
         override fun toKType(): KType = Double::class.createType()
     }
@@ -36,6 +40,7 @@ sealed class DataType {
 
     object VoidType : DataType() {
         override fun toString() = "Void"
+        override fun toKType(): KType = Unit::class.createType()
     }
 
     data class LambdaType(
@@ -43,7 +48,14 @@ sealed class DataType {
         val returnType: DataType
     ) : DataType() {
         override fun toString() = "[(${signature.joinToString(", ") { it.toString() }}) -> $returnType]"
+        override fun toKType(): KType {
+            throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
+        }
     }
 
-    data class ComplexType(val name: String) : DataType()
+    data class ComplexType(val name: String) : DataType() {
+        override fun toKType(): KType {
+            throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
+        }
+    }
 }

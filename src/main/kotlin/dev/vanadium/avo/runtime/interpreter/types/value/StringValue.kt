@@ -1,11 +1,14 @@
 package dev.vanadium.avo.runtime.interpreter.types.value
 
 import dev.vanadium.avo.error.RuntimeError
+import kotlin.reflect.KType
 
-data class StringValue(val value: String) : RuntimeValue(), KValueMappable {
+data class StringValue(val value: String) : RuntimeValue(), KotlinMappable {
     override fun toKotlinValue(): Any {
         return value
     }
+
+    override fun toKotlinType(): KType = dataType().toKType()
 
     override fun plus(
         other: RuntimeValue,

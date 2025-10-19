@@ -1,9 +1,11 @@
 package dev.vanadium.avo.runtime.interpreter.types.value
 
 import dev.vanadium.avo.runtime.interpreter.types.DataType
+import kotlin.reflect.KType
 
-interface KValueMappable {
+interface KotlinMappable {
     fun toKotlinValue(): Any
+    fun toKotlinType(): KType
 }
 
 sealed class RuntimeValue {

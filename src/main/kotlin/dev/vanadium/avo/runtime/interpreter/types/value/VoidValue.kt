@@ -1,8 +1,15 @@
 package dev.vanadium.avo.runtime.interpreter.types.value
 
 import dev.vanadium.avo.error.RuntimeError
+import kotlin.reflect.KType
 
-class VoidValue : RuntimeValue() {
+class VoidValue : RuntimeValue(), KotlinMappable {
+    override fun toKotlinValue(): Any {
+        return Unit
+    }
+
+    override fun toKotlinType(): KType = dataType().toKType()
+
     override fun plus(
         other: RuntimeValue,
         line: Int
