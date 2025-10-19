@@ -2,7 +2,26 @@ package dev.vanadium.avo.runtime.interpreter.types.value
 
 import dev.vanadium.avo.runtime.interpreter.types.DataType
 
+interface KValueMappable {
+    fun toKotlinValue(): Any
+}
+
 sealed class RuntimeValue {
+    companion object {
+        fun fromKotlinValue(value: Any): RuntimeValue {
+            return when (value) {
+                is Boolean -> BooleanValue(value)
+                is String  -> StringValue(value)
+                is Double  -> FloatValue(value)
+                is Int     -> IntegerValue(value)
+                is Unit    -> VoidValue()
+                else       -> throw RuntimeException(
+                    "Kotlin value of type ${value.javaClass.simpleName} cannot be converted to an Avo value"
+                )
+            }
+        }
+    }
+
     // Mathematical Operations
     abstract fun plus(
         other: RuntimeValue,

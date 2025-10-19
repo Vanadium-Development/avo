@@ -2,7 +2,11 @@ package dev.vanadium.avo.runtime.interpreter.types.value
 
 import dev.vanadium.avo.error.RuntimeError
 
-data class BooleanValue(val value: Boolean) : RuntimeValue() {
+data class BooleanValue(val value: Boolean) : RuntimeValue(), KValueMappable {
+    override fun toKotlinValue(): Any {
+        return value
+    }
+
     override fun plus(
         other: RuntimeValue,
         line: Int

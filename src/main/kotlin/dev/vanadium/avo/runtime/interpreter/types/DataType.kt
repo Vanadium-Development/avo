@@ -1,5 +1,12 @@
 package dev.vanadium.avo.runtime.interpreter.types
 
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
+
+interface KTypeMappable {
+    fun toKType(): KType
+}
+
 sealed class DataType {
     abstract override fun toString(): String
 
@@ -7,20 +14,24 @@ sealed class DataType {
         override fun toString() = "Inferred"
     }
 
-    object IntegerType : DataType() {
+    object IntegerType : DataType(), KTypeMappable {
         override fun toString() = "Integer"
+        override fun toKType(): KType = Int::class.createType()
     }
 
-    object FloatType : DataType() {
+    object FloatType : DataType(), KTypeMappable{
         override fun toString() = "Float"
+        override fun toKType(): KType = Float::class.createType()
     }
 
-    object StringType : DataType() {
+    object StringType : DataType(), KTypeMappable {
         override fun toString() = "String"
+        override fun toKType(): KType = String::class.createType()
     }
 
-    object BooleanType : DataType() {
+    object BooleanType : DataType(), KTypeMappable {
         override fun toString() = "Boolean"
+        override fun toKType(): KType = Boolean::class.createType()
     }
 
     object VoidType : DataType() {

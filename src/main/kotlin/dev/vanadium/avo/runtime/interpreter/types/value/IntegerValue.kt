@@ -3,7 +3,11 @@ package dev.vanadium.avo.runtime.interpreter.types.value
 import dev.vanadium.avo.error.RuntimeError
 import kotlin.math.pow
 
-data class IntegerValue(val value: Int) : RuntimeValue() {
+data class IntegerValue(val value: Int) : RuntimeValue(), KValueMappable {
+    override fun toKotlinValue(): Any {
+        return value
+    }
+
     override fun plus(
         other: RuntimeValue,
         line: Int

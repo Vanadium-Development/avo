@@ -110,6 +110,8 @@ enum class TokenType {
 
     @Keyword("void") KW_VOID,
 
+    @Keyword("internal") KW_INTERNAL,
+
     //
     // Symbols
     //

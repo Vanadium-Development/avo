@@ -1,5 +1,6 @@
 fun foo -> string {
-    we/
+    internal print("Hello")
+	return "Test"
 }
 
 foo()

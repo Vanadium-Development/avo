@@ -210,6 +210,7 @@ class Parser(lexer: Lexer) {
                 TokenType.KW_LOOP -> parseLoopExpression()
                 TokenType.KW_FUN  -> parseFunctionDefinition()
                 TokenType.LPAREN  -> parseSubExpression()
+                TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
                 else              -> null
             }
         }
@@ -234,7 +235,7 @@ class Parser(lexer: Lexer) {
 
         // Handle a number of consecutive calls on the same expressions
         while (tokenStream.currentToken.type == TokenType.LPAREN) {
-            val params = parseExpressionCallParameters()
+            val params = parseCallParameters()
             call = ExpressionCallNode(line, call, params)
         }
 
@@ -514,7 +515,7 @@ class Parser(lexer: Lexer) {
         return FunctionDefinitionNode(line, identifier, anon, parameters, returnType, block)
     }
 
-    private fun parseExpressionCallParameters(): List<ExpressionCallNode.CallParameter> {
+    private fun parseCallParameters(): List<ExpressionCallNode.CallParameter> {
         if (tokenStream.currentToken.type != TokenType.LPAREN)
             throw SyntaxError(
                 "Expected '(', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
@@ -550,6 +551,32 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return parameters
+    }
+
+    private fun parseInternalFunctionCallExpression(): InternalFunctionCallNode {
+        if (tokenStream.currentToken.type != TokenType.KW_INTERNAL)
+            throw SyntaxError(
+                "Expected 'internal', got ${tokenStream.currentToken.type}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw SyntaxError(
+                "Expected internal function identifier, got ${tokenStream.currentToken.type}",
+                currentLine
+            )
+
+        val identifier = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        val params = parseCallParameters()
+
+        return InternalFunctionCallNode(line, identifier, params)
     }
 
     private fun parseLoopBound(): LoopExpressionNode.LoopBound {

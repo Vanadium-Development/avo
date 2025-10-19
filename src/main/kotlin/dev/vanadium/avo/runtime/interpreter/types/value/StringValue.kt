@@ -2,7 +2,11 @@ package dev.vanadium.avo.runtime.interpreter.types.value
 
 import dev.vanadium.avo.error.RuntimeError
 
-data class StringValue(val value: String) : RuntimeValue() {
+data class StringValue(val value: String) : RuntimeValue(), KValueMappable {
+    override fun toKotlinValue(): Any {
+        return value
+    }
+
     override fun plus(
         other: RuntimeValue,
         line: Int

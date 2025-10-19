@@ -2,13 +2,14 @@ package dev.vanadium.avo.runtime.interpreter
 
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.interpreter.expression.*
+import dev.vanadium.avo.runtime.interpreter.internal.InternalFunctionLoader
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.*
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf
 
-class Interpreter {
+class Interpreter(val functionLoader: InternalFunctionLoader) {
     var scopes: Stack<Scope> = Stack()
     val scope get() = scopes.peek()
 
@@ -19,6 +20,7 @@ class Interpreter {
         scopes.push(Scope(null))
         registerInterpreter<BinaryOperationNode>(BinaryOperationInterpreter::class)
         registerInterpreter<ExpressionCallNode>(ExpressionCallInterpreter::class)
+        registerInterpreter<InternalFunctionCallNode>(InternalFunctionCallInterpreter::class)
         registerInterpreter<FunctionDefinitionNode>(FunctionDefinitionInterpreter::class)
         registerInterpreter<LiteralNode>(LiteralExpressionInterpreter::class)
         registerInterpreter<VariableAssignmentNode>(VariableAssignmentInterpreter::class)
