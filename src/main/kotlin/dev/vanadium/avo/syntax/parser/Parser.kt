@@ -538,6 +538,8 @@ class Parser(lexer: Lexer) {
                         currentLine
                     )
 
+                tokenStream.consume()
+
                 continue
             }
         }

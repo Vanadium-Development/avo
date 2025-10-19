@@ -21,7 +21,7 @@ sealed class DataType {
 
     object FloatType : DataType(), KTypeMappable{
         override fun toString() = "Float"
-        override fun toKType(): KType = Float::class.createType()
+        override fun toKType(): KType = Double::class.createType()
     }
 
     object StringType : DataType(), KTypeMappable {

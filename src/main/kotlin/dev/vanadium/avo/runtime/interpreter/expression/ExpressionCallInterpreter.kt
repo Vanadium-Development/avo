@@ -37,7 +37,6 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
 
         // The usable function scope is a new child scope of the captured scope
         val functionScope = Scope(function.scope)
-        pushScope(functionScope)
 
         val params = function.signature.zip(node.parameters)
         params.forEachIndexed { i, param ->
@@ -54,13 +53,15 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
             if (param.first.type != value.dataType())
                 throw RuntimeError(
                     "Parameter \"${param.first.identifier.value}\" of function \"${function.name()}\" " +
-                    "is declared with type $value but received ${param.first.type}",
+                    "is declared with type ${value.name()} but received ${param.first.type}",
                     node.line
                 )
 
             // Declare signature variables in the function scope
-            scope.declareVariable(param.first.identifier.value, value.dataType(), value, node.line)
+            functionScope.declareVariable(param.first.identifier.value, value.dataType(), value, node.line)
         }
+
+        pushScope(functionScope)
 
         val returnResult: ControlFlowResult = evaluateOther(function.block)
 

@@ -119,7 +119,7 @@ class Lexer(val input: String) {
             }
         }
 
-        return if (token.isEmpty()) Token.eof()
+        return if (token.isEmpty() && type == TokenType.UNDEFINED) Token.eof()
         else Token(token.toString(), type, line).typeAdjusted()
     }
 }

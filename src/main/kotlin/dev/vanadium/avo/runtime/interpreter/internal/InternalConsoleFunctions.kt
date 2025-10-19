@@ -2,8 +2,12 @@ package dev.vanadium.avo.runtime.interpreter.internal
 
 class InternalConsoleFunctions {
 
+    fun println(str: String) {
+        kotlin.io.println(str)
+    }
+
     fun print(str: String) {
-        println(str)
+        kotlin.io.print(str)
     }
 
 }

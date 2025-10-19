@@ -8,6 +8,7 @@ import dev.vanadium.avo.runtime.interpreter.types.value.VoidValue
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.primaryConstructor
 
 class InternalFunctionLoader {
@@ -47,7 +48,9 @@ class InternalFunctionLoader {
         for (inst in classList) {
             val clazz = inst::class
             val f = clazz.declaredFunctions.filter { fn ->
-                fn.name == identifier && fn.parameters.drop(1)
+                !fn.hasAnnotation<AvoInternalExclude>() &&
+                fn.name == identifier &&
+                fn.parameters.drop(1)
                     .map { p -> p.type } == parameters.map { p ->
                     (p.dataType() as KTypeMappable).toKType()
                 }

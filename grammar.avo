@@ -1,6 +1,33 @@
-fun foo -> string {
-    internal print("Hello")
-	return "Test"
+fun print(str: string) {
+    internal print(str)
 }
 
-foo()
+fun println(str: string) {
+    internal println(str)
+}
+
+fun sqrt(d: float) -> float {
+    return internal sqrt(d)
+}
+
+fun pow(d: float, exponent: float) -> float {
+    return internal pow(d, exponent)
+}
+
+fun sin(d: float) -> float {
+    return internal sin(d)
+}
+
+fun cos(d: float) -> float {
+    return internal cos(d)
+}
+
+fun tan(d: float) -> float {
+    return internal tan(d)
+}
+
+fun exp(d: float) -> float {
+    return internal exp(d)
+}
+
+print(sin(3.0) + "")
