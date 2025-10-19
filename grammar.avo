@@ -30,4 +30,4 @@ fun exp(d: float) -> float {
     return internal exp(d)
 }
 
-print(sin(3.0) + "")
+print("sin(3.5) = " + sin(3.5))

@@ -7,20 +7,26 @@
 ### Syntax Sample
 
 ```kotlin
-fun foo -> string {
-    var str: string
-    loop i 0 -> 10 {
-    if i == 5 {
-        str = str + "? "
-        continue
-    }
-    if i > 8 {
-        break
-    }
-    str = str + i + " "
-}
-    return str
+fun sin(d: float) -> float {
+    return internal sin(d)
 }
 
-foo()
+print("sin(3.5) = " + sin(3.5))
+```
+
+### API Example
+```kotlin
+fun main() {
+    Interpreter {
+        sourcePath { "input.avo" }
+        functionLoaderSource(InternalConsoleFunctions::class)
+        functionLoaderSource(InternalMathFunctions::class)
+        errorHandling {
+            exitOnError()
+            handlerImplementation { MordantErrorHandler }
+        }
+    }.exists {
+        run()
+    }
+}
 ```
