@@ -26,7 +26,7 @@ class Parser(lexer: Lexer) {
     private fun parseLambdaType(): DataType.LambdaType {
         if (tokenStream.currentToken.type != TokenType.LBRACKET)
             throw SyntaxError(
-                "Expected '[', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '[' at the start of a lambda type, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -36,7 +36,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RIGHT_ARROW)
             throw SyntaxError(
-                "Expected '->', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '->' after lambda type signature , got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -46,7 +46,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RBRACKET)
             throw SyntaxError(
-                "Expected ']', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected ']' at the end of a lambda type, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -77,7 +77,7 @@ class Parser(lexer: Lexer) {
         }
 
         throw SyntaxError(
-            "Invalid data type ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+            "Invalid data type starting with ${tokenStream.currentToken}",
             currentLine
         )
     }
@@ -92,7 +92,7 @@ class Parser(lexer: Lexer) {
     private fun parseReturnStatement(): ReturnStatementNode {
         if (tokenStream.currentToken.type != TokenType.KW_RETURN)
             throw SyntaxError(
-                "Expected 'return' on line ${tokenStream.currentToken.line}",
+                "Expected return statement, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -108,7 +108,7 @@ class Parser(lexer: Lexer) {
     private fun parseContinueStatement(): ContinueStatementNode {
         if (tokenStream.currentToken.type != TokenType.KW_CONTINUE)
             throw SyntaxError(
-                "Expected 'continue' on line ${tokenStream.currentToken.line}",
+                "Expected continue statement, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -122,7 +122,7 @@ class Parser(lexer: Lexer) {
     private fun parseBreakStatement(): BreakStatementNode {
         if (tokenStream.currentToken.type != TokenType.KW_BREAK)
             throw SyntaxError(
-                "Expected 'break' on line ${tokenStream.currentToken.line}",
+                "Expected break statement, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -168,7 +168,7 @@ class Parser(lexer: Lexer) {
     private fun parseSubExpression(): ExpressionNode {
         if (tokenStream.currentToken.type != TokenType.LPAREN)
             throw SyntaxError(
-                "Expected '(' at the start of a sub-expression, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '(' at the start of a sub-expression, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -178,7 +178,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RPAREN)
             throw SyntaxError(
-                "Expected ')' after a sub-expression, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected ')' at the end of a sub-expression, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -223,7 +223,7 @@ class Parser(lexer: Lexer) {
         }
 
         factor ?: throw SyntaxError(
-            "Expected a factor, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+            "Expected an expression factor, got ${tokenStream.currentToken}",
             currentLine
         )
 
@@ -245,7 +245,7 @@ class Parser(lexer: Lexer) {
     private fun parseVariableDeclaration(): VariableDeclarationNode {
         if (tokenStream.currentToken.type != TokenType.KW_VAR)
             throw SyntaxError(
-                "Expected 'var' at the beginning of a variable declaration, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected 'var' keyword at the beginning of a variable declaration, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -255,7 +255,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
             throw SyntaxError(
-                "Expected variable identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected variable identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -265,7 +265,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.COLON)
             throw SyntaxError(
-                "Expected ':', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected ':' after variable identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -285,7 +285,7 @@ class Parser(lexer: Lexer) {
     private fun parseVariableAssignment(): VariableAssignmentNode {
         if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
             throw SyntaxError(
-                "Expected identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected variable identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -297,7 +297,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.EQUALS)
             throw SyntaxError(
-                "Expected '=', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '=' after variable identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -311,7 +311,7 @@ class Parser(lexer: Lexer) {
     private fun parseVariableReference(): SymbolReferenceNode {
         if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
             throw SyntaxError(
-                "Expected identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected variable identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -329,7 +329,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.LBRACE)
             throw SyntaxError(
-                "Expected '{' at the start of a block expression, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '{' at the start of a block expression, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -353,7 +353,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RBRACE)
             throw SyntaxError(
-                "Reached end of file while parsing block starting on line $line",
+                "Reached end of file while parsing block expression starting on line $line",
                 currentLine
             )
 
@@ -365,7 +365,7 @@ class Parser(lexer: Lexer) {
     private fun parseConditionalExpressionBranch(): ConditionalExpressionNode.ConditionalExpressionCollection? {
         if (tokenStream.currentToken.type != TokenType.KW_IF)
             throw SyntaxError(
-                "Expected 'if' at the start of a conditional expression, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected if keyword at the start of a conditional expression, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -391,7 +391,7 @@ class Parser(lexer: Lexer) {
         } else if (tokenStream.currentToken.type == TokenType.KW_ELSE) {
             if (collectBranch.defaultBranch != null)
                 throw SyntaxError(
-                    "A conditional expression cannot have more than one default branch. Conflicting branch defined on line ${tokenStream.currentToken.line}",
+                    "A conditional expression cannot have more than one default branch",
                     currentLine
                 )
 
@@ -408,7 +408,7 @@ class Parser(lexer: Lexer) {
         val line = currentLine
 
         val collection = parseConditionalExpressionBranch() ?: throw SyntaxError(
-            "Conditional expression tree does not exist in conditional expression. Error on line ${tokenStream.currentToken.line}",
+            "Conditional expression tree does not exist in conditional expression.",
             currentLine
         )
 
@@ -418,7 +418,7 @@ class Parser(lexer: Lexer) {
     private fun parseFunctionSignature(named: Boolean): List<FunctionDefinitionNode.FunctionSignatureParameter> {
         if (tokenStream.currentToken.type != TokenType.LPAREN)
             throw SyntaxError(
-                "Expected '(', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '(' at the start of a function signature, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -432,7 +432,7 @@ class Parser(lexer: Lexer) {
             if (named) {
                 if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
                     throw SyntaxError(
-                        "Expected parameter identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                        "Expected parameter identifier, got ${tokenStream.currentToken}",
                         currentLine
                     )
 
@@ -442,7 +442,7 @@ class Parser(lexer: Lexer) {
 
                 if (tokenStream.currentToken.type != TokenType.COLON)
                     throw SyntaxError(
-                        "Expected ':', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                        "Expected ':' after function signature parameter, got ${tokenStream.currentToken}",
                         currentLine
                     )
 
@@ -456,7 +456,7 @@ class Parser(lexer: Lexer) {
             if (tokenStream.currentToken.type == TokenType.COMMA) {
                 if (tokenStream.nextToken.type == TokenType.RPAREN)
                     throw SyntaxError(
-                        "Expected more parameters after ',', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                        "Expected more function definition parameters after ',', got ${tokenStream.currentToken}",
                         currentLine
                     )
                 tokenStream.consume()
@@ -478,7 +478,7 @@ class Parser(lexer: Lexer) {
     private fun parseFunctionDefinition(): FunctionDefinitionNode {
         if (tokenStream.currentToken.type != TokenType.KW_FUN)
             throw SyntaxError(
-                "Expected 'fun', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected fun keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -518,7 +518,7 @@ class Parser(lexer: Lexer) {
     private fun parseCallParameters(): List<ExpressionCallNode.CallParameter> {
         if (tokenStream.currentToken.type != TokenType.LPAREN)
             throw SyntaxError(
-                "Expected '(', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '(' after function identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -534,7 +534,7 @@ class Parser(lexer: Lexer) {
             if (tokenStream.currentToken.type == TokenType.COMMA) {
                 if (tokenStream.nextToken.type == TokenType.RPAREN)
                     throw SyntaxError(
-                        "Expected more parameters after ',', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                        "Expected more function call parameters after ',', got ${tokenStream.currentToken}",
                         currentLine
                     )
 
@@ -546,7 +546,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RPAREN)
             throw SyntaxError(
-                "Expected ')' after parameter list, got ${tokenStream.currentToken.type} Error on line ${tokenStream.currentToken.line}",
+                "Expected ')' after function call parameter list, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -558,7 +558,7 @@ class Parser(lexer: Lexer) {
     private fun parseInternalFunctionCallExpression(): InternalFunctionCallNode {
         if (tokenStream.currentToken.type != TokenType.KW_INTERNAL)
             throw SyntaxError(
-                "Expected 'internal', got ${tokenStream.currentToken.type}",
+                "Expected internal keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -608,7 +608,7 @@ class Parser(lexer: Lexer) {
     private fun parseLoopExpression(): LoopExpressionNode {
         if (tokenStream.currentToken.type != TokenType.KW_LOOP)
             throw SyntaxError(
-                "Expected 'loop', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected loop identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -618,7 +618,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
             throw SyntaxError(
-                "Expected variable identifier, got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected index variable identifier, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -630,7 +630,7 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RIGHT_ARROW)
             throw SyntaxError(
-                "Expected '->', got ${tokenStream.currentToken.type} on line ${tokenStream.currentToken.line}",
+                "Expected '->' after lower loop bound, got ${tokenStream.currentToken}",
                 currentLine
             )
 

@@ -12,34 +12,34 @@ sealed class DataType : KTypeMappable {
     abstract override fun toString(): String
 
     object InferredType : DataType() {
-        override fun toString() = "Inferred"
+        override fun toString() = "<inferred>"
         override fun toKType(): KType {
             throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
         }
     }
 
     object IntegerType : DataType(), KTypeMappable {
-        override fun toString() = "Integer"
+        override fun toString() = "int"
         override fun toKType(): KType = Int::class.createType()
     }
 
     object FloatType : DataType(), KTypeMappable {
-        override fun toString() = "Float"
+        override fun toString() = "float"
         override fun toKType(): KType = Double::class.createType()
     }
 
     object StringType : DataType(), KTypeMappable {
-        override fun toString() = "String"
+        override fun toString() = "string"
         override fun toKType(): KType = String::class.createType()
     }
 
     object BooleanType : DataType(), KTypeMappable {
-        override fun toString() = "Boolean"
+        override fun toString() = "boolean"
         override fun toKType(): KType = Boolean::class.createType()
     }
 
     object VoidType : DataType() {
-        override fun toString() = "Void"
+        override fun toString() = "void"
         override fun toKType(): KType = Unit::class.createType()
     }
 

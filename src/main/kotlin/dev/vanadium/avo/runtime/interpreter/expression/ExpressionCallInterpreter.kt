@@ -53,7 +53,7 @@ class ExpressionCallInterpreter(interpreter: Interpreter) : ExpressionInterprete
             if (param.first.type != value.dataType())
                 throw RuntimeError(
                     "Parameter \"${param.first.identifier.value}\" of function \"${function.name()}\" " +
-                    "is declared with type ${value.name()} but received ${param.first.type}",
+                    "is declared with type ${param.first.type} but was called with ${value.dataType()}",
                     node.line
                 )
 

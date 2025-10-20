@@ -3,6 +3,7 @@ package dev.vanadium.avo.error.handler
 import com.github.ajalt.mordant.rendering.BorderType
 import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.table.Borders
 import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
@@ -16,17 +17,18 @@ object MordantErrorHandler : DefaultErrorHandler(), ErrorHandler {
     private fun error(
         title: String,
         subtitle: String,
-        message: String
+        message: String,
+        color: TextStyle
     ) {
         val table = table {
             borderType = BorderType.Companion.DOUBLE
-            borderStyle = TextColors.red
+            borderStyle = color
             align = TextAlign.LEFT
             body {
                 cellBorders = Borders.NONE
                 row {
-                    cell("($title)") {
-                        style = TextColors.red
+                    cell(title) {
+                        style = color
                         cellBorders = Borders.LEFT
                     }
                     cell(message) {
@@ -44,14 +46,14 @@ object MordantErrorHandler : DefaultErrorHandler(), ErrorHandler {
     }
 
     override fun syntaxError(error: SyntaxError) {
-        error("Syntax Error", "Line ${error.line}", error.message)
+        error("Syntax Error", "Line ${error.line}", error.message, TextColors.red)
     }
 
     override fun runtimeError(error: RuntimeError) {
-        error("Runtime Error", "Line ${error.line}", error.message)
+        error("Runtime Error", "Line ${error.line}", error.message, TextColors.brightRed)
     }
 
     override fun sourceError(error: SourceError) {
-        error("Source Error", "File ${error.file}", error.message)
+        error("Source Error", "File ${error.file}", error.message, TextColors.brightCyan)
     }
 }

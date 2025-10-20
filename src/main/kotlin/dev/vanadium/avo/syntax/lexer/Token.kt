@@ -205,7 +205,10 @@ data class Token(
     }
 
     override fun toString(): String {
-        return "Token ( '$value' | $type | Line $line )"
+        if (type == TokenType.EOF)
+            return "EOF"
+
+        return "'$value'"
     }
 
     fun isEof() = this.type == TokenType.EOF
