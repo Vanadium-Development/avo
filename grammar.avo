@@ -1,3 +1,4 @@
+# Standard Library Bindings
 fun print(str: string) {
     internal print(str)
 }
@@ -30,4 +31,5 @@ fun exp(d: float) -> float {
     return internal exp(d)
 }
 
-print("sin(3.5) = " + sin(3))
+# Example
+print("sin(3.5) = " + sin(3.3))

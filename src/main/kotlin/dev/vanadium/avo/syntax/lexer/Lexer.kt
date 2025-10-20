@@ -58,10 +58,27 @@ class Lexer(val input: String) {
 
         var type = TokenType.UNDEFINED
         val token = StringBuilder()
+        var isComment = false
         var isString = false
 
         while (!isEof()) {
             val c = peek()!!
+
+            if (isComment) {
+                if (c == '\n') {
+                    skipSpaces()
+                    isComment = false
+                    continue
+                }
+                advance()
+                continue
+            }
+
+            if (c == '#') {
+                isComment = true
+                advance()
+                continue
+            }
 
             if (c == '"') {
                 isString = !isString
