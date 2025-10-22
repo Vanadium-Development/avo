@@ -2,6 +2,7 @@ package dev.vanadium.avo.runtime.interpreter.expression
 
 import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.Scope
+import dev.vanadium.avo.runtime.interpreter.InterpreterImpl
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
@@ -11,6 +12,7 @@ import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.types.value.VoidValue
 import dev.vanadium.avo.syntax.ast.LoopExpressionNode
 
+@InterpreterImpl
 class LoopExpressionInterpreter(interpreter: Interpreter) : ExpressionInterpreter<LoopExpressionNode>(interpreter) {
     override fun evaluate(node: LoopExpressionNode): ControlFlowResult {
         val lowerBoundResult = evaluateOther(node.start.expression)

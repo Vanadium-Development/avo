@@ -53,7 +53,9 @@ sealed class DataType : KTypeMappable {
         }
     }
 
-    data class ComplexType(val name: String) : DataType() {
+    data class KindType(
+        val identifier: String,
+    ) : DataType() {
         override fun toKType(): KType {
             throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
         }

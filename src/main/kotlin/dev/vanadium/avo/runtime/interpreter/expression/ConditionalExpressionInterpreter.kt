@@ -1,6 +1,7 @@
 package dev.vanadium.avo.runtime.interpreter.expression
 
 import dev.vanadium.avo.error.RuntimeError
+import dev.vanadium.avo.runtime.interpreter.InterpreterImpl
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
@@ -8,6 +9,7 @@ import dev.vanadium.avo.runtime.interpreter.types.value.BooleanValue
 import dev.vanadium.avo.runtime.interpreter.types.value.VoidValue
 import dev.vanadium.avo.syntax.ast.ConditionalExpressionNode
 
+@InterpreterImpl
 class ConditionalExpressionInterpreter(interpreter: Interpreter) :
     ExpressionInterpreter<ConditionalExpressionNode>(interpreter) {
     override fun evaluate(node: ConditionalExpressionNode): ControlFlowResult {

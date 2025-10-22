@@ -3,6 +3,7 @@ package dev.vanadium.avo.runtime.interpreter.expression
 import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.interpreter.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Interpreter
+import dev.vanadium.avo.runtime.interpreter.InterpreterImpl
 import dev.vanadium.avo.runtime.interpreter.types.ControlFlowResult
 import dev.vanadium.avo.runtime.interpreter.types.DataType
 import dev.vanadium.avo.runtime.interpreter.types.value.BooleanValue
@@ -12,6 +13,7 @@ import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
 import dev.vanadium.avo.runtime.interpreter.types.value.StringValue
 import dev.vanadium.avo.syntax.ast.VariableDeclarationNode
 
+@InterpreterImpl
 class VariableDeclarationInterpreter(interpreter: Interpreter) :
     ExpressionInterpreter<VariableDeclarationNode>(interpreter) {
     private fun DataType.variableDefaultValue(line: Int) = when (this) {
@@ -34,7 +36,7 @@ class VariableDeclarationInterpreter(interpreter: Interpreter) :
             line
         )
 
-        is DataType.ComplexType -> throw RuntimeError(
+        is DataType.KindType -> throw RuntimeError(
             "Complex types are not supported yet",
             line
         )

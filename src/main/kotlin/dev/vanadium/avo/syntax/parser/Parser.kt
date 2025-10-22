@@ -17,7 +17,7 @@ class Parser(lexer: Lexer) {
 
     fun parse(): ProgramNode {
         val nodes = mutableListOf<Node>()
-        while (tokenStream.currentToken.type != TokenType.EOF) {
+        while (!tokenStream.currentToken.isEof()) {
             nodes.add(parseExpression())
         }
         return ProgramNode(nodes, 1)
@@ -63,7 +63,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_BOOL       -> DataType.BooleanType
             TokenType.KW_VOID       -> DataType.VoidType
             TokenType.QUESTION_MARK -> DataType.InferredType
-            TokenType.IDENTIFIER    -> DataType.ComplexType(tokenStream.currentToken.value)
+            TokenType.IDENTIFIER    -> DataType.KindType(tokenStream.currentToken.value)
             else                    -> null
         }
 
@@ -80,6 +80,82 @@ class Parser(lexer: Lexer) {
             "Invalid data type starting with ${tokenStream.currentToken}",
             currentLine
         )
+    }
+
+    private fun parseKindDefinition(): KindDefinitionExpressionNode {
+        if (tokenStream.currentToken.type != TokenType.KW_KIND)
+            throw SyntaxError(
+                "Expected kind keyword, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        var id = Token.eof()
+
+        // A Kind can be anonymous
+        if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
+            id = tokenStream.currentToken
+
+            tokenStream.consume()
+        }
+
+        if (tokenStream.currentToken.type != TokenType.LBRACE)
+            throw SyntaxError(
+                "Expected '{' after kind identifier, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        val fields = mutableListOf<KindDefinitionExpressionNode.KindDefinitionField>()
+
+        // Parse kind fields
+        while (tokenStream.currentToken.type != TokenType.RBRACE && !tokenStream.currentToken.isEof()) {
+            if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+                throw SyntaxError(
+                    "Expected kind field identifier, got ${tokenStream.currentToken}",
+                    currentLine
+                )
+
+            val fieldIdentifier = tokenStream.currentToken
+
+            tokenStream.consume()
+
+            if (tokenStream.currentToken.type != TokenType.COLON)
+                throw SyntaxError(
+                    "Expected ':' after field identifier \"${fieldIdentifier.value}\", got ${tokenStream.currentToken}",
+                    currentLine
+                )
+
+            tokenStream.consume()
+
+            val type = parseDataType()
+            fields.add(
+                KindDefinitionExpressionNode.KindDefinitionField(
+                    fieldIdentifier,
+                    type
+                )
+            )
+        }
+
+        if (tokenStream.currentToken.type != TokenType.RBRACE)
+            throw SyntaxError(
+                "Expected '}' after field list of kind \"${id.asIdentifier()}\"",
+                currentLine
+            )
+
+        if (fields.isEmpty())
+            throw SyntaxError(
+                "Definition of kind \"${id.asIdentifier()}\" must have at least one field",
+                line
+            )
+
+        tokenStream.consume()
+
+        return KindDefinitionExpressionNode(line, id, fields)
     }
 
     private fun parseStatement(): StatementNode? = when (tokenStream.currentToken.type) {
@@ -188,8 +264,27 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseFactor(): ExpressionNode {
+        val factor = parsePrimaryFactor()
+
+        // Expression Call
+        if (tokenStream.currentToken.type != TokenType.LPAREN)
+            return factor
+
+        var call: ExpressionNode = factor
+
+        // Handle a number of consecutive calls on the same expressions
+        while (tokenStream.currentToken.type == TokenType.LPAREN) {
+            val params = parseCallParameters()
+            call = ExpressionCallNode(factor.line, call, params)
+        }
+
+        return call
+    }
+
+    private fun parsePrimaryFactor(): ExpressionNode {
         val line = currentLine
 
+        // Literals
         var factor: ExpressionNode? = when (tokenStream.currentToken.type) {
             TokenType.FLOAT_LITERAL   -> LiteralNode.FloatLiteral(line, tokenStream.currentToken.value.toDouble())
             TokenType.INTEGER_LITERAL -> LiteralNode.IntegerLiteral(line, tokenStream.currentToken.value.toInt())
@@ -201,45 +296,36 @@ class Parser(lexer: Lexer) {
 
         if (factor != null) {
             tokenStream.consume()
+            return factor
         }
 
-        if (factor == null) {
-            factor = when (tokenStream.currentToken.type) {
-                TokenType.KW_VAR  -> parseVariableDeclaration()
-                TokenType.KW_IF   -> parseConditionalExpression()
-                TokenType.KW_LOOP -> parseLoopExpression()
-                TokenType.KW_FUN  -> parseFunctionDefinition()
-                TokenType.LPAREN  -> parseSubExpression()
-                TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
-                else              -> null
-            }
+        // Complex Expressions
+        factor = when (tokenStream.currentToken.type) {
+            TokenType.KW_VAR      -> parseVariableDeclaration()
+            TokenType.KW_IF       -> parseConditionalExpression()
+            TokenType.KW_LOOP     -> parseLoopExpression()
+            TokenType.KW_FUN      -> parseFunctionDefinition()
+            TokenType.LPAREN      -> parseSubExpression()
+            TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
+            TokenType.KW_KIND     -> parseKindDefinition()
+            else                  -> null
         }
 
-        if (factor == null && tokenStream.currentToken.type == TokenType.IDENTIFIER) {
+        if (factor != null) {
+            return factor
+        }
+
+        if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
             factor = when (tokenStream.nextToken.type) {
                 TokenType.EQUALS -> parseVariableAssignment()
                 else             -> parseVariableReference()
             }
         }
 
-        factor ?: throw SyntaxError(
+        return factor ?: throw SyntaxError(
             "Expected an expression factor, got ${tokenStream.currentToken}",
             currentLine
         )
-
-        // Expression Call
-        if (tokenStream.currentToken.type != TokenType.LPAREN)
-            return factor
-
-        var call: ExpressionNode = factor
-
-        // Handle a number of consecutive calls on the same expressions
-        while (tokenStream.currentToken.type == TokenType.LPAREN) {
-            val params = parseCallParameters()
-            call = ExpressionCallNode(line, call, params)
-        }
-
-        return call
     }
 
     private fun parseVariableDeclaration(): VariableDeclarationNode {
