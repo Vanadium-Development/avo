@@ -110,7 +110,7 @@ enum class TokenType {
 
     @Keyword("void") KW_VOID,
 
-    @Keyword("kind") KW_KIND,
+    @Keyword("complex") KW_COMPLEX,
 
     @Keyword("internal") KW_INTERNAL,
 
@@ -215,6 +215,6 @@ data class Token(
 
     fun isEof() = this.type == TokenType.EOF
 
-    fun asIdentifier(): String = if (type == TokenType.EOF) "<anonymous>" else value
+    fun asIdentifier(): String = if (type == TokenType.EOF) "<anonymous>" else "\"value\""
 
 }

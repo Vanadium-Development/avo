@@ -1,10 +1,10 @@
 package dev.vanadium.avo.syntax.ast
 
-import dev.vanadium.avo.runtime.interpreter.types.value.BooleanValue
-import dev.vanadium.avo.runtime.interpreter.types.value.FloatValue
-import dev.vanadium.avo.runtime.interpreter.types.value.IntegerValue
-import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
-import dev.vanadium.avo.runtime.interpreter.types.value.StringValue
+import dev.vanadium.avo.runtime.types.value.BooleanValue
+import dev.vanadium.avo.runtime.types.value.FloatValue
+import dev.vanadium.avo.runtime.types.value.IntegerValue
+import dev.vanadium.avo.runtime.types.value.RuntimeValue
+import dev.vanadium.avo.runtime.types.value.StringValue
 
 sealed class LiteralNode(
     @Transient

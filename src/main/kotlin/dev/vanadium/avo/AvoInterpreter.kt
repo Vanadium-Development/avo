@@ -4,9 +4,8 @@ import com.google.gson.Gson
 import dev.vanadium.avo.error.BaseError
 import dev.vanadium.avo.error.SourceError
 import dev.vanadium.avo.error.handler.ErrorHandlingConfig
-import dev.vanadium.avo.runtime.interpreter.Interpreter
-import dev.vanadium.avo.runtime.interpreter.internal.InternalFunctionLoader
-import dev.vanadium.avo.syntax.ast.ExpressionNode
+import dev.vanadium.avo.runtime.internal.InternalFunctionLoader
+import dev.vanadium.avo.runtime.interpreter.Runtime
 import dev.vanadium.avo.syntax.ast.ProgramNode
 import dev.vanadium.avo.syntax.lexer.Lexer
 import dev.vanadium.avo.syntax.parser.Parser
@@ -69,7 +68,7 @@ class AvoInterpreter(
     private val lexer = Lexer(source)
     private val parser = Parser(lexer)
     private lateinit var program: ProgramNode
-    private val interpreter = Interpreter(functionLoader)
+    private val runtime = Runtime(functionLoader)
     private val gson = Gson().newBuilder().setPrettyPrinting().create()
 
     val errorHandler get() = ErrorHandlingConfig.handler
@@ -83,16 +82,7 @@ class AvoInterpreter(
     }
 
     fun run() {
-        try {
-            program.nodes.forEach f@{
-                if (it !is ExpressionNode)
-                    return@f
-
-                interpreter.evaluate(it)
-            }
-        } catch (e: BaseError) {
-            errorHandler.dispatch(e)
-        }
+        runtime.run(program, errorHandler)
     }
 }
 

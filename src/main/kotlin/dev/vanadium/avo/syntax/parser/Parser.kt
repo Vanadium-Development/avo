@@ -1,7 +1,7 @@
 package dev.vanadium.avo.syntax.parser
 
 import dev.vanadium.avo.error.SyntaxError
-import dev.vanadium.avo.runtime.interpreter.types.DataType
+import dev.vanadium.avo.runtime.types.DataType
 import dev.vanadium.avo.syntax.ast.*
 import dev.vanadium.avo.syntax.lexer.Lexer
 import dev.vanadium.avo.syntax.lexer.Token
@@ -10,7 +10,6 @@ import dev.vanadium.avo.syntax.lexer.TokenType
 import java.util.*
 
 class Parser(lexer: Lexer) {
-
     private val tokenStream = TokenStream(lexer)
     private val currentLine get() = tokenStream.currentToken.line
     private val blockHierarchy = Stack<BlockExpressionNode>()
@@ -18,9 +17,26 @@ class Parser(lexer: Lexer) {
     fun parse(): ProgramNode {
         val nodes = mutableListOf<Node>()
         while (!tokenStream.currentToken.isEof()) {
-            nodes.add(parseExpression())
+            nodes.add(
+                parseAny()
+            )
         }
         return ProgramNode(nodes, 1)
+    }
+
+    private fun parseAny(): Node {
+        val statement = when (tokenStream.currentToken.type) {
+            TokenType.KW_RETURN   -> parseReturnStatement()
+            TokenType.KW_CONTINUE -> parseContinueStatement()
+            TokenType.KW_BREAK    -> parseBreakStatement()
+            TokenType.KW_COMPLEX  -> parseComplexTypeDefinition()
+            else                  -> null
+        }
+        if (statement != null) {
+            return statement
+        }
+
+        return parseExpression()
     }
 
     private fun parseLambdaType(): DataType.LambdaType {
@@ -63,7 +79,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_BOOL       -> DataType.BooleanType
             TokenType.KW_VOID       -> DataType.VoidType
             TokenType.QUESTION_MARK -> DataType.InferredType
-            TokenType.IDENTIFIER    -> DataType.KindType(tokenStream.currentToken.value)
+            TokenType.IDENTIFIER    -> DataType.ComplexTypeReferenceType(tokenStream.currentToken.value)
             else                    -> null
         }
 
@@ -82,10 +98,10 @@ class Parser(lexer: Lexer) {
         )
     }
 
-    private fun parseKindDefinition(): KindDefinitionExpressionNode {
-        if (tokenStream.currentToken.type != TokenType.KW_KIND)
+    private fun parseComplexTypeDefinition(): ComplexTypeDefinitionNode {
+        if (tokenStream.currentToken.type != TokenType.KW_COMPLEX)
             throw SyntaxError(
-                "Expected kind keyword, got ${tokenStream.currentToken}",
+                "Expected complex keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -93,30 +109,31 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        var id = Token.eof()
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw SyntaxError(
+                "Expected complex type identifier, got ${tokenStream.currentToken}",
+                currentLine
+            )
 
-        // A Kind can be anonymous
-        if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
-            id = tokenStream.currentToken
+        val id = tokenStream.currentToken
 
-            tokenStream.consume()
-        }
+        tokenStream.consume()
 
         if (tokenStream.currentToken.type != TokenType.LBRACE)
             throw SyntaxError(
-                "Expected '{' after kind identifier, got ${tokenStream.currentToken}",
+                "Expected '{' after complex type identifier ${id.asIdentifier()}, got ${tokenStream.currentToken}",
                 currentLine
             )
 
         tokenStream.consume()
 
-        val fields = mutableListOf<KindDefinitionExpressionNode.KindDefinitionField>()
+        val fields = mutableListOf<ComplexTypeDefinitionNode.ComplexTypeField>()
 
         // Parse kind fields
         while (tokenStream.currentToken.type != TokenType.RBRACE && !tokenStream.currentToken.isEof()) {
             if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
                 throw SyntaxError(
-                    "Expected kind field identifier, got ${tokenStream.currentToken}",
+                    "Expected field identifier for complex type ${id.asIdentifier()}, got ${tokenStream.currentToken}",
                     currentLine
                 )
 
@@ -126,7 +143,7 @@ class Parser(lexer: Lexer) {
 
             if (tokenStream.currentToken.type != TokenType.COLON)
                 throw SyntaxError(
-                    "Expected ':' after field identifier \"${fieldIdentifier.value}\", got ${tokenStream.currentToken}",
+                    "Expected ':' after field identifier ${fieldIdentifier.asIdentifier()} of complex type ${id.asIdentifier()}, got ${tokenStream.currentToken}",
                     currentLine
                 )
 
@@ -134,7 +151,7 @@ class Parser(lexer: Lexer) {
 
             val type = parseDataType()
             fields.add(
-                KindDefinitionExpressionNode.KindDefinitionField(
+                ComplexTypeDefinitionNode.ComplexTypeField(
                     fieldIdentifier,
                     type
                 )
@@ -143,26 +160,19 @@ class Parser(lexer: Lexer) {
 
         if (tokenStream.currentToken.type != TokenType.RBRACE)
             throw SyntaxError(
-                "Expected '}' after field list of kind \"${id.asIdentifier()}\"",
+                "Expected '}' after field list of complex type ${id.asIdentifier()}",
                 currentLine
             )
 
         if (fields.isEmpty())
             throw SyntaxError(
-                "Definition of kind \"${id.asIdentifier()}\" must have at least one field",
+                "Complex type ${id.asIdentifier()} must be declared with at least one field",
                 line
             )
 
         tokenStream.consume()
 
-        return KindDefinitionExpressionNode(line, id, fields)
-    }
-
-    private fun parseStatement(): StatementNode? = when (tokenStream.currentToken.type) {
-        TokenType.KW_RETURN   -> parseReturnStatement()
-        TokenType.KW_CONTINUE -> parseContinueStatement()
-        TokenType.KW_BREAK    -> parseBreakStatement()
-        else                  -> null
+        return ComplexTypeDefinitionNode(line, id, fields)
     }
 
     private fun parseReturnStatement(): ReturnStatementNode {
@@ -307,7 +317,6 @@ class Parser(lexer: Lexer) {
             TokenType.KW_FUN      -> parseFunctionDefinition()
             TokenType.LPAREN      -> parseSubExpression()
             TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
-            TokenType.KW_KIND     -> parseKindDefinition()
             else                  -> null
         }
 
@@ -427,12 +436,9 @@ class Parser(lexer: Lexer) {
         blockHierarchy.push(block)
 
         while (tokenStream.currentToken.type != TokenType.RBRACE && !tokenStream.currentToken.isEof()) {
-            val statement = parseStatement()
-            if (statement != null) {
-                nodes.add(statement)
-                continue
-            }
-            nodes.add(parseExpression())
+            nodes.add(
+                parseAny()
+            )
         }
 
         blockHierarchy.pop()

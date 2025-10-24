@@ -1,6 +1,6 @@
 package dev.vanadium.avo.syntax.ast
 
-import dev.vanadium.avo.runtime.interpreter.types.DataType
+import dev.vanadium.avo.runtime.types.DataType
 import dev.vanadium.avo.syntax.lexer.Token
 
 data class VariableDeclarationNode(

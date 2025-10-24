@@ -1,8 +1,8 @@
-#kind Person {
-#    firstName: string
-#    lastName: string
-#    age: int
-#}
+complex Person {
+    firstName: string
+    lastName: string
+    age: int
+}
 
 # Standard Library Bindings
 fun print(str: string) {

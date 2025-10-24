@@ -1,11 +1,15 @@
 package dev.vanadium.avo.runtime
 
 import dev.vanadium.avo.error.RuntimeError
-import dev.vanadium.avo.runtime.interpreter.types.DataType
-import dev.vanadium.avo.runtime.interpreter.types.value.RuntimeValue
-import dev.vanadium.avo.runtime.interpreter.types.Symbol
+import dev.vanadium.avo.runtime.types.ComplexType
+import dev.vanadium.avo.runtime.types.DataType
+import dev.vanadium.avo.runtime.types.Symbol
+import dev.vanadium.avo.runtime.types.value.RuntimeValue
 import dev.vanadium.avo.syntax.ast.BlockExpressionNode
+import dev.vanadium.avo.syntax.ast.ComplexTypeDefinitionNode
 import dev.vanadium.avo.syntax.ast.FunctionDefinitionNode
+import dev.vanadium.avo.util.findFirstDuplicate
+import dev.vanadium.avo.util.ifPresent
 
 data class Scope(
     @Transient
@@ -14,11 +18,19 @@ data class Scope(
 
     private val symbols = mutableMapOf<String, Symbol>()
 
+    private val complexTypes = mutableMapOf<String, ComplexType>()
+
     /**
-     * Check whether a given identifier is already used in the current scope.
+     * Check whether a given symbol identifier is already used in the current scope.
      */
-    private fun isIdentifierTaken(identifier: String) =
+    private fun isSymbolIdentifierTaken(identifier: String) =
         symbols.containsKey(identifier)
+
+    /**
+     * Check whether a given complex type  identifier is already used in the current scope.
+     */
+    private fun isComplexTypeIdentifierTaken(identifier: String) =
+        complexTypes.containsKey(identifier)
 
     /**
      * Create a variable in the current scope.
@@ -30,17 +42,20 @@ data class Scope(
         expression: RuntimeValue,
         line: Int
     ) {
-        if (isIdentifierTaken(identifier)) {
+        if (isSymbolIdentifierTaken(identifier)) {
             throw RuntimeError(
                 "Duplicate identifier: $identifier",
                 line
             )
         }
+
+        listOf(type).validateTypes(line)
+
         symbols[identifier] = Symbol.Variable(this, expression, type)
     }
 
     /**
-     * Set the value of an existing variable in the current scope or one of the parent scopes.
+     * Set the value of an existing variable in this or one of the parent scopes.
      * This will fail if the variable is not found.
      */
     fun assignVariable(
@@ -70,7 +85,7 @@ data class Scope(
     }
 
     /**
-     * Create a copy of the current scope that references existing variables and functions.
+     * Create a copy of this scope that references existing variables and functions.
      * This is used during a function definition to maintain lexical ordering.
      */
     fun capture(): Scope {
@@ -83,7 +98,7 @@ data class Scope(
     }
 
     /**
-     * Define a function in the current scope.
+     * Define a function in this scope.
      * This will fail if the identifier is already in use.
      */
     fun defineFunction(
@@ -98,7 +113,9 @@ data class Scope(
             return Symbol.Function(Scope(capture()), identifier, signature, returnType, block)
         }
 
-        if (isIdentifierTaken(identifier)) {
+        signature.map { it.type }.validateTypes(line)
+
+        if (isSymbolIdentifierTaken(identifier)) {
             throw RuntimeError(
                 "Duplicate function with identifier $identifier",
                 line
@@ -113,7 +130,7 @@ data class Scope(
     }
 
     /**
-     * Get a symbol from the current or the parent scopes.
+     * Get a symbol from this or one of the parent scopes.
      * This will fail if the symbol cannot be found.
      */
     fun getSymbol(
@@ -132,5 +149,84 @@ data class Scope(
             )
 
         return parent.getSymbol(identifier, line)
+    }
+
+
+    /**
+     * Define a complex type in this scope.
+     * This will fail if the identifier is already in use.
+     */
+    fun defineComplexType(
+        identifier: String,
+        fields: List<ComplexTypeDefinitionNode.ComplexTypeField>,
+        line: Int
+    ) {
+        if (isComplexTypeIdentifierTaken(identifier))
+            throw RuntimeError(
+                "Duplicate type identifier: $identifier",
+                line
+            )
+
+        fields.map { it.identifier.value }.findFirstDuplicate() ifPresent {
+            throw RuntimeError(
+                "Duplicate field \"$it\" in definition of complex type \"$identifier\"",
+                line
+            )
+        }
+
+        fields.map { it.dataType }.validateTypes(line)
+
+        complexTypes[identifier] = ComplexType(
+            identifier,
+            fields,
+            line
+        )
+    }
+
+    /**
+     * Retrieve a complex type from this or one of the parent scopes.
+     * This will fail if the type does not exist.
+     */
+    fun getComplexType(
+        identifier: String,
+        line: Int
+    ): ComplexType {
+        return getComplexTypeOrNull(identifier) ?: throw RuntimeError(
+            "Undefined complex type: $identifier",
+            line
+        )
+    }
+
+    /**
+     * Retrieve a complex type from this or one of the parent scopes
+     * or `null` if the type does not exist.
+     */
+    fun getComplexTypeOrNull(
+        identifier: String,
+    ): ComplexType? {
+        val type = complexTypes[identifier]
+        if (type != null)
+            return type
+        if (parent == null)
+            return null
+        return parent.getComplexTypeOrNull(identifier)
+    }
+
+    /**
+     * Throws a `RuntimeError` if a Type in This List is Undefined
+     */
+    fun List<DataType>.validateTypes(line: Int): Boolean {
+        forEach { type ->
+            if (type !is DataType.ComplexTypeReferenceType)
+                return@forEach
+
+            if (getComplexTypeOrNull(type.identifier) == null)
+                throw RuntimeError(
+                    "Undefined type \"${type.identifier}\" on line $line",
+                    line
+                )
+        }
+
+        return true
     }
 }

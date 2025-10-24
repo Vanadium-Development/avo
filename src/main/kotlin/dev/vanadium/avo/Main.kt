@@ -1,8 +1,8 @@
 package dev.vanadium.avo
 
 import dev.vanadium.avo.error.handler.MordantErrorHandler
-import dev.vanadium.avo.runtime.interpreter.internal.InternalConsoleFunctions
-import dev.vanadium.avo.runtime.interpreter.internal.InternalMathFunctions
+import dev.vanadium.avo.runtime.internal.InternalConsoleFunctions
+import dev.vanadium.avo.runtime.internal.InternalMathFunctions
 
 fun main() {
     Interpreter {
