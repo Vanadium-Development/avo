@@ -46,3 +46,5 @@ var dole: ? = new Person {
     lastName = "Dolezal"
     age = 12
 }
+
+print("Dole: " + dole.firstName)

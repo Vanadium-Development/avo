@@ -357,21 +357,18 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseFactor(): ExpressionNode {
-        val factor = parsePrimaryFactor()
+        var factor = parsePrimaryFactor()
 
         // Expression Call
-        if (tokenStream.currentToken.type != TokenType.LPAREN)
-            return factor
-
-        var call: ExpressionNode = factor
-
-        // Handle a number of consecutive calls on the same expressions
-        while (tokenStream.currentToken.type == TokenType.LPAREN) {
-            val params = parseCallParameters()
-            call = ExpressionCallNode(factor.line, call, params)
+        if (tokenStream.currentToken.type == TokenType.LPAREN) {
+            // Handle a number of consecutive calls on the same expressions
+            while (tokenStream.currentToken.type == TokenType.LPAREN) {
+                val params = parseCallParameters()
+                factor = ExpressionCallNode(factor.line, factor, params)
+            }
         }
 
-        return call
+        return parseMemberAccess(factor)
     }
 
     private fun parsePrimaryFactor(): ExpressionNode {
@@ -419,6 +416,33 @@ class Parser(lexer: Lexer) {
             "Expected an expression factor, got ${tokenStream.currentToken}",
             currentLine
         )
+    }
+
+    private fun parseMemberAccess(base: ExpressionNode): ExpressionNode {
+        var expr: ExpressionNode = base
+
+        while (tokenStream.currentToken.type == TokenType.DOT) {
+            tokenStream.consume()
+
+            if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+                throw SyntaxError(
+                    "Expected member identifier after '.', got ${tokenStream.currentToken}",
+                    currentLine
+                )
+
+            val member = tokenStream.currentToken
+            tokenStream.consume()
+
+            expr = MemberAccessNode(expr.line, expr, member)
+
+            // Check if this member is immediately called
+            if (tokenStream.currentToken.type == TokenType.LPAREN) {
+                val params = parseCallParameters()
+                expr = ExpressionCallNode(expr.line, expr, params)
+            }
+        }
+
+        return expr
     }
 
     private fun parseVariableDeclaration(): VariableDeclarationNode {
