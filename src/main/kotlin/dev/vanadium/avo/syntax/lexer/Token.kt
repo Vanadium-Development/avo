@@ -112,6 +112,8 @@ enum class TokenType {
 
     @Keyword("complex") KW_COMPLEX,
 
+    @Keyword("new") KW_NEW,
+
     @Keyword("internal") KW_INTERNAL,
 
     //

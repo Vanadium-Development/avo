@@ -226,7 +226,7 @@ data class Scope(
      */
     fun List<DataType>.validateTypes(line: Int): Boolean {
         forEach { type ->
-            if (type !is DataType.ComplexTypeReferenceType)
+            if (type !is DataType.ComplexTypeReferenceNode)
                 return@forEach
 
             if (getComplexTypeOrNull(type.identifier) == null)

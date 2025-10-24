@@ -36,7 +36,7 @@ class VariableDeclarationInterpreter(runtime: Runtime) :
             line
         )
 
-        is DataType.ComplexTypeReferenceType -> throw RuntimeError(
+        is DataType.ComplexTypeReferenceNode -> throw RuntimeError(
             "Complex types are not supported yet",
             line
         )
@@ -71,6 +71,7 @@ class VariableDeclarationInterpreter(runtime: Runtime) :
         }
 
         scope.declareVariable(node.identifier.value, node.type, expr, node.line)
+
 
         return ControlFlowResult.Value(expr)
     }

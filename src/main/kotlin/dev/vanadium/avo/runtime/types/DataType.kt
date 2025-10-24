@@ -53,9 +53,11 @@ sealed class DataType : KTypeMappable {
         }
     }
 
-    data class ComplexTypeReferenceType(
+    data class ComplexTypeReferenceNode(
         val identifier: String,
     ) : DataType() {
+        override fun toString(): String = identifier
+
         override fun toKType(): KType {
             throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
         }

@@ -1,8 +1,3 @@
-complex Person {
-    firstName: string
-    lastName: string
-    age: int
-}
 
 # Standard Library Bindings
 fun print(str: string) {
@@ -39,3 +34,15 @@ fun exp(d: float) -> float {
 
 # Example
 print("sin(3.5) = " + sin(3.3))
+
+complex Person {
+    firstName: string
+    lastName: string
+    age: int
+}
+
+var dole: ? = new Person {
+    firstName = "Michael"
+    lastName = "Dolezal"
+    age = 12
+}

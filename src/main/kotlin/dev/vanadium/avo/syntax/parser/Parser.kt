@@ -79,7 +79,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_BOOL       -> DataType.BooleanType
             TokenType.KW_VOID       -> DataType.VoidType
             TokenType.QUESTION_MARK -> DataType.InferredType
-            TokenType.IDENTIFIER    -> DataType.ComplexTypeReferenceType(tokenStream.currentToken.value)
+            TokenType.IDENTIFIER    -> DataType.ComplexTypeReferenceNode(tokenStream.currentToken.value)
             else                    -> null
         }
 
@@ -101,7 +101,7 @@ class Parser(lexer: Lexer) {
     private fun parseComplexTypeDefinition(): ComplexTypeDefinitionNode {
         if (tokenStream.currentToken.type != TokenType.KW_COMPLEX)
             throw SyntaxError(
-                "Expected complex keyword, got ${tokenStream.currentToken}",
+                "Expected 'complex' keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -173,6 +173,89 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return ComplexTypeDefinitionNode(line, id, fields)
+    }
+
+    private fun parseComplexTypeInstantiation(): InstantiationNode {
+        if (tokenStream.currentToken.type != TokenType.KW_NEW)
+            throw SyntaxError(
+                "Expected 'new' keyword, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        val typeLine = currentLine
+        val type = parseDataType()
+
+        if (type !is DataType.ComplexTypeReferenceNode) {
+            throw SyntaxError(
+                "Expected complex type identifier after 'new' keyword, got $type",
+                typeLine
+            )
+        }
+
+        val typeIdentifier = Token(type.identifier, TokenType.IDENTIFIER, typeLine)
+
+        if (tokenStream.currentToken.type != TokenType.LBRACE)
+            throw SyntaxError(
+                "Expected '{', got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        val fields = mutableListOf<InstantiationNode.InstantiationField>()
+
+        while (tokenStream.currentToken.type != TokenType.RBRACE && !tokenStream.currentToken.isEof()) {
+            if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+                throw SyntaxError(
+                    "Expected field identifier, got ${tokenStream.currentToken}",
+                    currentLine
+                )
+
+            val fieldId = tokenStream.currentToken
+
+            tokenStream.consume()
+
+            if (tokenStream.currentToken.type != TokenType.EQUALS)
+                throw SyntaxError(
+                    "Expected '=' after identifier of field ${fieldId.asIdentifier()}, got ${tokenStream.currentToken}",
+                    currentLine
+                )
+
+            tokenStream.consume()
+
+            val fieldExpr = parseExpression()
+
+            fields.add(
+                InstantiationNode.InstantiationField(
+                    fieldId,
+                    fieldExpr
+                )
+            )
+        }
+
+        if (tokenStream.currentToken.type != TokenType.RBRACE)
+            throw SyntaxError(
+                "Expected '}' after instance fields of ${type.identifier}, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        if (fields.isEmpty())
+            throw SyntaxError(
+                "Complex type ${type.identifier} must be instantiated with at least one field",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        return InstantiationNode(
+            line,
+            typeIdentifier,
+            fields
+        )
     }
 
     private fun parseReturnStatement(): ReturnStatementNode {
@@ -317,6 +400,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_FUN      -> parseFunctionDefinition()
             TokenType.LPAREN      -> parseSubExpression()
             TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
+            TokenType.KW_NEW      -> parseComplexTypeInstantiation()
             else                  -> null
         }
 
@@ -457,7 +541,7 @@ class Parser(lexer: Lexer) {
     private fun parseConditionalExpressionBranch(): ConditionalExpressionNode.ConditionalExpressionCollection? {
         if (tokenStream.currentToken.type != TokenType.KW_IF)
             throw SyntaxError(
-                "Expected if keyword at the start of a conditional expression, got ${tokenStream.currentToken}",
+                "Expected 'if' keyword at the start of a conditional expression, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -570,7 +654,7 @@ class Parser(lexer: Lexer) {
     private fun parseFunctionDefinition(): FunctionDefinitionNode {
         if (tokenStream.currentToken.type != TokenType.KW_FUN)
             throw SyntaxError(
-                "Expected fun keyword, got ${tokenStream.currentToken}",
+                "Expected 'fun' keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -650,7 +734,7 @@ class Parser(lexer: Lexer) {
     private fun parseInternalFunctionCallExpression(): InternalFunctionCallNode {
         if (tokenStream.currentToken.type != TokenType.KW_INTERNAL)
             throw SyntaxError(
-                "Expected internal keyword, got ${tokenStream.currentToken}",
+                "Expected 'internal' keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 

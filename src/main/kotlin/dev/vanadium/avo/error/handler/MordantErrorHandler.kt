@@ -21,7 +21,7 @@ object MordantErrorHandler : DefaultErrorHandler(), ErrorHandler {
         color: TextStyle
     ) {
         val table = table {
-            borderType = BorderType.Companion.DOUBLE
+            borderType = BorderType.HEAVY
             borderStyle = color
             align = TextAlign.LEFT
             body {
@@ -29,19 +29,26 @@ object MordantErrorHandler : DefaultErrorHandler(), ErrorHandler {
                 row {
                     cell(title) {
                         style = color
-                        cellBorders = Borders.LEFT
+                        cellBorders = Borders.LEFT_TOP
                     }
                     cell(message) {
                         style = TextColors.white
                         align = TextAlign.RIGHT
+                        cellBorders = Borders.TOP_RIGHT
                     }
                 }
-                row(subtitle) {
+                row {
                     style = TextColors.Companion.rgb("#95a5a6")
-                    cellBorders = Borders.LEFT
+                    cell(subtitle) {
+                        cellBorders = Borders.LEFT_BOTTOM
+                    }
+                    cell("") {
+                        cellBorders = Borders.BOTTOM_RIGHT
+                    }
                 }
             }
         }
+        terminal.println()
         terminal.println(table)
     }
 

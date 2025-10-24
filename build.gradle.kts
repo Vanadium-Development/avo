@@ -27,6 +27,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.20")
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("org.reflections:reflections:0.10.2")
+    implementation("org.slf4j:slf4j-nop:2.0.9")
     implementation("com.github.ajalt.mordant:mordant:3.0.2")
 }
 
