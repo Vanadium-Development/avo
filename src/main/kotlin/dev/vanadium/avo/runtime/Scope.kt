@@ -108,12 +108,21 @@ data class Scope(
         block: BlockExpressionNode,
         line: Int
     ): Symbol.Function {
+        val formattedIdentifier = if (identifier == null) "<anonymous>" else "\"$identifier\""
+
+        signature.map { it.identifier.value }.findFirstDuplicate() ifPresent {
+            throw RuntimeError(
+                "Duplicate parameter identifier \"$it\" in signature of function $formattedIdentifier",
+                line
+            )
+        }
+
+        listOf(*signature.map { it.type }.toTypedArray(), returnType).validateTypes(line)
+
         // Anonymous Function
         if (identifier == null) {
             return Symbol.Function(Scope(capture()), identifier, signature, returnType, block)
         }
-
-        signature.map { it.type }.validateTypes(line)
 
         if (isSymbolIdentifierTaken(identifier)) {
             throw RuntimeError(
