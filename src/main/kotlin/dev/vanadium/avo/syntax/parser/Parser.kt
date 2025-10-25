@@ -1,6 +1,5 @@
 package dev.vanadium.avo.syntax.parser
 
-import dev.vanadium.avo.BuildVersion
 import dev.vanadium.avo.error.SyntaxError
 import dev.vanadium.avo.runtime.types.DataType
 import dev.vanadium.avo.syntax.ast.*
@@ -26,18 +25,21 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseAny(): Node {
-        val statement = when (tokenStream.currentToken.type) {
+        var n: Node? = when (tokenStream.currentToken.type) {
             TokenType.KW_RETURN   -> parseReturnStatement()
             TokenType.KW_CONTINUE -> parseContinueStatement()
             TokenType.KW_BREAK    -> parseBreakStatement()
             TokenType.KW_COMPLEX  -> parseComplexTypeDefinition()
             else                  -> null
         }
-        if (statement != null) {
-            return statement
-        }
 
-        return parseExpression()
+        if (n == null)
+            n = parseExpression()
+
+        while (tokenStream.currentToken.type == TokenType.SEMICOLON)
+            tokenStream.consume()
+
+        return n
     }
 
     private fun parseLambdaType(): DataType.LambdaType {

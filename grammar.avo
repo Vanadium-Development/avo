@@ -30,28 +30,8 @@ fun tan(d: float) -> float {
 
 fun exp(d: float) -> float {
     return internal exp(d)
-}
+};
 
-complex Greeting {
-    name: string
-}
-
-fun {
-    fun greet(g: Greeting) {
-        println("Hello, " + g.name + "!")
-    }
-
-    greet(new Greeting {
-        name = "World"
-    })
-
-    fun sumNumbersBetween(a: int, b: int) -> int {
-        var sum: int
-        loop i excl a -> excl b {
-            sum = sum + i
-        }
-        return sum
-    }
-
-    println("The sum between 0 and 10 is: " + sumNumbersBetween(0, 10))
-}()
+(var sayHi: [() -> void] = fun {
+    println("Hello, World!")
+})()
