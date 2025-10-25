@@ -37,9 +37,19 @@ complex Greeting {
 }
 
 fun greet(g: Greeting) {
-    print("Hello, " + g.name + "!")
+    println("Hello, " + g.name + "!")
 }
 
 greet(new Greeting {
     name = "World"
 })
+
+fun sumNumbersBetween(a: int, b: int) -> int {
+    var sum: int
+    loop i excl a -> excl b {
+        sum = sum + i
+    }
+    return sum
+}
+
+println("The sum between 0 and 10 is: " + sumNumbersBetween(0, 10))
