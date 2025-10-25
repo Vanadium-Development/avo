@@ -368,7 +368,12 @@ class Parser(lexer: Lexer) {
             }
         }
 
-        return parseMemberAccess(factor)
+        factor = parseMemberAccess(factor)
+
+        if (tokenStream.currentToken.type == TokenType.EQUALS)
+            return parseVariableAssignment(factor)
+
+        return factor
     }
 
     private fun parsePrimaryFactor(): ExpressionNode {
@@ -406,10 +411,7 @@ class Parser(lexer: Lexer) {
         }
 
         if (tokenStream.currentToken.type == TokenType.IDENTIFIER) {
-            factor = when (tokenStream.nextToken.type) {
-                TokenType.EQUALS -> parseVariableAssignment()
-                else             -> parseVariableReference()
-            }
+            factor = parseVariableReference()
         }
 
         return factor ?: throw SyntaxError(
@@ -485,22 +487,12 @@ class Parser(lexer: Lexer) {
         return VariableDeclarationNode(line, id, type, parseExpression())
     }
 
-    private fun parseVariableAssignment(): VariableAssignmentNode {
-        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
-            throw SyntaxError(
-                "Expected variable identifier, got ${tokenStream.currentToken}",
-                currentLine
-            )
-
-        val line = currentLine
-
-        val id = tokenStream.currentToken
-
-        tokenStream.consume()
+    private fun parseVariableAssignment(target: ExpressionNode): AssignmentNode {
+        val line = target.line
 
         if (tokenStream.currentToken.type != TokenType.EQUALS)
             throw SyntaxError(
-                "Expected '=' after variable identifier, got ${tokenStream.currentToken}",
+                "Expected '=' after symbol path, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -508,7 +500,7 @@ class Parser(lexer: Lexer) {
 
         val expr = parseExpression()
 
-        return VariableAssignmentNode(line, id, expr)
+        return AssignmentNode(line, target, expr)
     }
 
     private fun parseVariableReference(): SymbolReferenceNode {

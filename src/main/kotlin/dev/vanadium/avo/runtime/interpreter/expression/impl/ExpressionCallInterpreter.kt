@@ -41,6 +41,7 @@ class ExpressionCallInterpreter(runtime: Runtime) : ExpressionInterpreter<Expres
         val functionScope = Scope(function.scope)
 
         val params = function.signature.zip(node.parameters)
+
         params.forEachIndexed { i, param ->
             val valueResult = evaluateOther(param.second.expression)
 
@@ -64,7 +65,6 @@ class ExpressionCallInterpreter(runtime: Runtime) : ExpressionInterpreter<Expres
         }
 
         pushScope(functionScope)
-
         val returnResult: ControlFlowResult = evaluateOther(function.block)
 
         if (returnResult !is ControlFlowResult.Value)

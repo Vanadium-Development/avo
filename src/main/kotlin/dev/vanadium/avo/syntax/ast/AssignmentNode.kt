@@ -1,10 +1,8 @@
 package dev.vanadium.avo.syntax.ast
 
-import dev.vanadium.avo.syntax.lexer.Token
-
-data class VariableAssignmentNode(
+data class AssignmentNode(
     @Transient
     override val line: Int,
-    val identifier: Token,
+    val target: ExpressionNode,
     val value: ExpressionNode
 ) : ExpressionNode(line)

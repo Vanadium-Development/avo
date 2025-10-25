@@ -32,25 +32,32 @@ fun exp(d: float) -> float {
     return internal exp(d)
 }
 
-complex Role {
-    roleName: string
-}
-
 complex Person {
     firstName: string
     lastName: string
     age: int
-    role: Role
 }
 
 var dole: ? = new Person {
     firstName = "Michael"
     lastName = "Dolezal"
     age = 15
-    role = new Role {
-        roleName = "UntisMaster"
-    }
 }
 
-println("[" + dole.firstName + ", " + dole.lastName + "]")
-println("The Role of the Dole: " + dole.role.roleName)
+fun printPerson(p: Person) {
+    println("-" * 25)
+    println("First Name: " + p.firstName)
+    println("Last Name: " + p.lastName)
+    println("Age: " + p.age)
+    println("-" * 25)
+}
+
+fun changeIdentity(p: Person, firstName: string, lastName: string) {
+    p.firstName = firstName
+    p.lastName = lastName
+}
+
+printPerson(dole)
+println("")
+changeIdentity(dole, "Hans Peter", "Berger")
+printPerson(dole)

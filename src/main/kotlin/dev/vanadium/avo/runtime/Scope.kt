@@ -94,6 +94,9 @@ data class Scope(
         symbols.forEach { (identifier, variable) ->
             copy.symbols[identifier] = variable
         }
+        complexTypes.forEach { (identifier, complexType) ->
+            copy.complexTypes[identifier] = complexType
+        }
         return copy
     }
 
