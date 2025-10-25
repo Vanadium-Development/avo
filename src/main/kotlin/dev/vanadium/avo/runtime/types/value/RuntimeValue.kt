@@ -86,13 +86,14 @@ sealed class RuntimeValue {
     abstract fun name(): String
 
     fun dataType(): DataType = when (this) {
-        is IntegerValue -> DataType.IntegerType
-        is FloatValue   -> DataType.FloatType
-        is StringValue  -> DataType.StringType
-        is BooleanValue -> DataType.BooleanType
-        is VoidValue    -> DataType.VoidType
+        is IntegerValue  -> DataType.IntegerType
+        is FloatValue    -> DataType.FloatType
+        is StringValue   -> DataType.StringType
+        is BooleanValue  -> DataType.BooleanType
+        is VoidValue     -> DataType.VoidType
         is LambdaValue   -> DataType.LambdaType(this.function.signature.map { it.type }, this.function.returnType)
         is InstanceValue -> DataType.ComplexTypeReferenceNode(type.identifier)
+        is ArrayValue    -> DataType.ArrayType(type.elementType)
     }
 
 }

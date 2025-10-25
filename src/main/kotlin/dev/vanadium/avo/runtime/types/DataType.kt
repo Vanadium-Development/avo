@@ -1,6 +1,8 @@
 package dev.vanadium.avo.runtime.types
 
 import dev.vanadium.avo.error.RuntimeError
+import dev.vanadium.avo.runtime.types.value.ArrayValue
+import dev.vanadium.avo.runtime.types.value.RuntimeValue
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
@@ -57,6 +59,16 @@ sealed class DataType : KTypeMappable {
         val identifier: String,
     ) : DataType() {
         override fun toString(): String = identifier
+
+        override fun toKType(): KType {
+            throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
+        }
+    }
+
+    data class ArrayType(
+        val elementType: DataType
+    ) : DataType() {
+        override fun toString(): String = "[$elementType]"
 
         override fun toKType(): KType {
             throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)

@@ -1,45 +1,43 @@
 package dev.vanadium.avo.runtime.interpreter.expression.impl
 
 import dev.vanadium.avo.error.RuntimeError
-import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Runtime
+import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
 import dev.vanadium.avo.runtime.types.ControlFlowResult
 import dev.vanadium.avo.runtime.types.DataType
-import dev.vanadium.avo.runtime.types.value.BooleanValue
-import dev.vanadium.avo.runtime.types.value.FloatValue
-import dev.vanadium.avo.runtime.types.value.IntegerValue
-import dev.vanadium.avo.runtime.types.value.RuntimeValue
-import dev.vanadium.avo.runtime.types.value.StringValue
+import dev.vanadium.avo.runtime.types.value.*
 import dev.vanadium.avo.syntax.ast.VariableDeclarationNode
 
 @ExpressionInterpreterImplementation
 class VariableDeclarationInterpreter(runtime: Runtime) :
     ExpressionInterpreter<VariableDeclarationNode>(runtime) {
     private fun DataType.variableDefaultValue(line: Int) = when (this) {
-        DataType.IntegerType    -> IntegerValue.Companion.defaultValue()
-        DataType.StringType     -> StringValue.Companion.defaultValue()
-        DataType.BooleanType    -> BooleanValue.Companion.defaultValue()
-        DataType.FloatType      -> FloatValue.Companion.defaultValue()
-        DataType.VoidType       -> throw RuntimeError(
+        DataType.IntegerType                 -> IntegerValue.defaultValue()
+        DataType.StringType                  -> StringValue.defaultValue()
+        DataType.BooleanType                 -> BooleanValue.defaultValue()
+        DataType.FloatType                   -> FloatValue.defaultValue()
+        DataType.VoidType                    -> throw RuntimeError(
             "Variable cannot be declared with void type",
             line
         )
 
-        DataType.InferredType   -> throw RuntimeError(
+        DataType.InferredType                -> throw RuntimeError(
             "Cannot infer type in unassigned variable",
             line
         )
 
-        is DataType.LambdaType  -> throw RuntimeError(
-            "Lambda variable must be assigned on declaration",
+        is DataType.LambdaType               -> throw RuntimeError(
+            "Lambda variable must be assigned upon declaration",
             line
         )
 
         is DataType.ComplexTypeReferenceNode -> throw RuntimeError(
-            "Complex types are not supported yet",
+            "Complex type variable must be assigned upon declaration",
             line
         )
+
+        is DataType.ArrayType                -> ArrayValue(this, mutableListOf())
     }
 
     override fun evaluate(node: VariableDeclarationNode): ControlFlowResult {
