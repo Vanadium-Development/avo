@@ -8,27 +8,28 @@
 
 ```kotlin
 complex Greeting {
-        name: string
+    name: string
 }
 
-fun greet(g: Greeting) {
-    println("Hello, " + g.name + "!")
-}
-
-greet(new Greeting {
-    name = "World"
-})
-
-fun sumNumbersBetween(a: int, b: int) -> int {
-    var sum: int
-    loop i excl a -> excl b {
-        sum = sum + i
+fun {
+    fun greet(g: Greeting) {
+        println("Hello, " + g.name + "!")
     }
-    return sum
-}
 
-println("The sum between 0 and 10 is: " + sumNumbersBetween(0, 10))
+    greet(new Greeting {
+        name = "World"
+    })
 
+    fun sumNumbersBetween(a: int, b: int) -> int {
+        var sum: int
+        loop i excl a -> excl b {
+            sum = sum + i
+        }
+        return sum
+    }
+
+    println("The sum between 0 and 10 is: " + sumNumbersBetween(0, 10))
+}()
 ```
 
 ### API Example
