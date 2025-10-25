@@ -1,13 +1,12 @@
 package dev.vanadium.avo.syntax.lexer
 
-import dev.vanadium.avo.error.LexerException
+import dev.vanadium.avo.error.LexerError
 
 fun Char.isIdentifierChar(): Boolean {
     return isLetter() || this == '_'
 }
 
 class Lexer(val input: String) {
-
     private var position = 0
     private var line = 1
 
@@ -111,7 +110,7 @@ class Lexer(val input: String) {
             var nextType = c.classify(type)
             val isSymbol = nextType == TokenType.GENERIC_SYMBOL
             if (isSymbol) {
-                nextType = c.toString().findTokenType() ?: throw LexerException("Unknown symbol: $c")
+                nextType = c.toString().findTokenType() ?: throw LexerError("Unknown symbol: $c", line)
             }
             if (type == TokenType.UNDEFINED) type = nextType
             else if (nextType != type) break
@@ -139,4 +138,12 @@ class Lexer(val input: String) {
         return if (token.isEmpty() && type == TokenType.UNDEFINED) Token.eof()
         else Token(token.toString(), type, line).typeAdjusted()
     }
+
+    fun tokenizeAll(): List<Token> {
+        val tokens = mutableListOf<Token>()
+        while (hasNext())
+            tokens.add(nextToken())
+        return tokens
+    }
+
 }

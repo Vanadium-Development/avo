@@ -4,6 +4,16 @@ version = "1.0-SNAPSHOT"
 plugins {
     kotlin("jvm") version "2.2.20"
     application
+    `maven-publish`
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifactId = "avo"
+        }
+    }
 }
 
 application {
@@ -31,8 +41,30 @@ dependencies {
     implementation("com.github.ajalt.mordant:mordant:3.0.2")
 }
 
+val generateVersionFile by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/kotlin")
+    outputs.dir(outputDir)
+
+    doLast {
+        val file = outputDir.get().file("BuildVersion.kt").asFile
+        file.parentFile.mkdirs()
+        file.writeText("""
+            package dev.vanadium.avo
+            
+            object BuildVersion {
+                const val VERSION = "$version"
+            }
+        """.trimIndent())
+    }
+}
+
 kotlin {
+    sourceSets["main"].kotlin.srcDir(layout.buildDirectory.dir("generated/kotlin"))
     jvmToolchain(20)
+}
+
+tasks.named("compileKotlin") {
+    dependsOn(generateVersionFile)
 }
 
 tasks.test {

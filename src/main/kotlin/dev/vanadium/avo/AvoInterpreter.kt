@@ -66,8 +66,8 @@ class AvoInterpreter(
     functionLoader: InternalFunctionLoader
 ) {
     private val lexer = Lexer(source)
-    private val parser = Parser(lexer)
-    private lateinit var program: ProgramNode
+    private lateinit var parser: Parser
+    private var program: ProgramNode? = null
     private val runtime = Runtime(functionLoader)
     private val gson = Gson().newBuilder().setPrettyPrinting().create()
 
@@ -75,6 +75,7 @@ class AvoInterpreter(
 
     init {
         try {
+            parser = Parser(lexer)
             program = parser.parse()
         } catch (e: BaseError) {
             ErrorHandlingConfig.handler.dispatch(e)
@@ -82,7 +83,7 @@ class AvoInterpreter(
     }
 
     fun run() {
-        runtime.run(program, errorHandler)
+        runtime.run(program ?: return, errorHandler)
     }
 }
 

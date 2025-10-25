@@ -1,5 +1,6 @@
 package dev.vanadium.avo.syntax.parser
 
+import dev.vanadium.avo.BuildVersion
 import dev.vanadium.avo.error.SyntaxError
 import dev.vanadium.avo.runtime.types.DataType
 import dev.vanadium.avo.syntax.ast.*
@@ -800,7 +801,7 @@ class Parser(lexer: Lexer) {
     private fun parseLoopExpression(): LoopExpressionNode {
         if (tokenStream.currentToken.type != TokenType.KW_LOOP)
             throw SyntaxError(
-                "Expected loop identifier, got ${tokenStream.currentToken}",
+                "Expected 'loop' keyword, got ${tokenStream.currentToken}",
                 currentLine
             )
 

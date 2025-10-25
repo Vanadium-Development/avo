@@ -7,6 +7,7 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.table.Borders
 import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
+import dev.vanadium.avo.error.LexerError
 import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.error.SourceError
 import dev.vanadium.avo.error.SyntaxError
@@ -48,7 +49,6 @@ object MordantErrorHandler : DefaultErrorHandler(), ErrorHandler {
                 }
             }
         }
-        terminal.println()
         terminal.println(table)
     }
 
@@ -62,5 +62,9 @@ object MordantErrorHandler : DefaultErrorHandler(), ErrorHandler {
 
     override fun sourceError(error: SourceError) {
         error("Source Error", "File ${error.file}", error.message, TextColors.brightCyan)
+    }
+
+    override fun lexerError(error: LexerError) {
+        error("Lexer Error", "Line ${error.line}", error.message, TextColors.brightRed)
     }
 }
