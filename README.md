@@ -7,11 +7,17 @@
 ### Syntax Sample
 
 ```kotlin
-fun sin(d: float) -> float {
-    return internal sin(d)
+complex Greeting {
+        name: string
 }
 
-print("sin(3.5) = " + sin(3.5))
+fun greet(g: Greeting) {
+    print("Hello, " + g.name + "!")
+}
+
+greet(new Greeting {
+    name = "World"
+})
 ```
 
 ### API Example
