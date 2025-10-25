@@ -32,19 +32,25 @@ fun exp(d: float) -> float {
     return internal exp(d)
 }
 
-# Example
-print("sin(3.5) = " + sin(3.3))
+complex Role {
+    roleName: string
+}
 
 complex Person {
     firstName: string
     lastName: string
     age: int
+    role: Role
 }
 
 var dole: ? = new Person {
     firstName = "Michael"
     lastName = "Dolezal"
-    age = 12
+    age = 15
+    role = new Role {
+        roleName = "UntisMaster"
+    }
 }
 
-print("Dole: " + dole.firstName)
+println("[" + dole.firstName + ", " + dole.lastName + "]")
+println("The Role of the Dole: " + dole.role.roleName)

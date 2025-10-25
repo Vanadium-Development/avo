@@ -217,6 +217,6 @@ data class Token(
 
     fun isEof() = this.type == TokenType.EOF
 
-    fun asIdentifier(): String = if (type == TokenType.EOF) "<anonymous>" else "\"value\""
+    fun asIdentifier(): String = if (type == TokenType.EOF) "<anonymous>" else "\"$value\""
 
 }

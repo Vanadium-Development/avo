@@ -57,7 +57,7 @@ class InstantiationInterpreter(runtime: Runtime) :
             val expectedFieldType = expectedFields[fieldIdentifier.value]!!
             if (expectedFieldType != resultValue.dataType())
                 throw RuntimeError(
-                    "Field ${fieldIdentifier.asIdentifier()} of type ${node.typeIdentifier.asIdentifier()} is "
+                    "Field ${fieldIdentifier.asIdentifier()} in type ${node.typeIdentifier.asIdentifier()} is "
                     + "of type $expectedFieldType and cannot be initialized with a value of type $resultType",
                     fieldIdentifier.line
                 )
