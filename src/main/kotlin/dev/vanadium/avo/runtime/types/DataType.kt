@@ -49,7 +49,7 @@ sealed class DataType : KTypeMappable {
         val signature: List<DataType>,
         val returnType: DataType
     ) : DataType() {
-        override fun toString() = "[(${signature.joinToString(", ") { it.toString() }}) -> $returnType]"
+        override fun toString() = "((${signature.joinToString(", ") { it.toString() }}) -> $returnType)"
         override fun toKType(): KType {
             throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
         }

@@ -32,6 +32,8 @@ fun exp(d: float) -> float {
     return internal exp(d)
 };
 
-(var sayHi: [() -> void] = fun {
+var messages: [string] = ["Test", 1];
+
+(var sayHi: (() -> void) = fun {
     println("Hello, World!")
 })()

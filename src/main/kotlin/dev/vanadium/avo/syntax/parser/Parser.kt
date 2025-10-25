@@ -43,9 +43,9 @@ class Parser(lexer: Lexer) {
     }
 
     private fun parseLambdaType(): DataType.LambdaType {
-        if (tokenStream.currentToken.type != TokenType.LBRACKET)
+        if (tokenStream.currentToken.type != TokenType.LPAREN)
             throw SyntaxError(
-                "Expected '[' at the start of a lambda type, got ${tokenStream.currentToken}",
+                "Expected '(' at the start of a lambda type, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -63,15 +63,37 @@ class Parser(lexer: Lexer) {
 
         val returnType = parseDataType()
 
-        if (tokenStream.currentToken.type != TokenType.RBRACKET)
+        if (tokenStream.currentToken.type != TokenType.RPAREN)
             throw SyntaxError(
-                "Expected ']' at the end of a lambda type, got ${tokenStream.currentToken}",
+                "Expected ')' at the end of a lambda type, got ${tokenStream.currentToken}",
                 currentLine
             )
 
         tokenStream.consume()
 
         return DataType.LambdaType(signature.map { it.type }, returnType)
+    }
+
+    private fun parseArrayType(): DataType.ArrayType {
+        if (tokenStream.currentToken.type != TokenType.LBRACKET)
+            throw SyntaxError(
+                "Expected '[' at the start of an array type, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        val elementType = parseDataType()
+
+        if (tokenStream.currentToken.type != TokenType.RBRACKET)
+            throw SyntaxError(
+                "Expected ']' after array element type, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        return DataType.ArrayType(elementType)
     }
 
     private fun parseDataType(): DataType {
@@ -91,9 +113,11 @@ class Parser(lexer: Lexer) {
             return type
         }
 
-        if (tokenStream.currentToken.type == TokenType.LBRACKET) {
+        if (tokenStream.currentToken.type == TokenType.LPAREN)
             return parseLambdaType()
-        }
+
+        if (tokenStream.currentToken.type == TokenType.LBRACKET)
+            return parseArrayType()
 
         throw SyntaxError(
             "Invalid data type starting with ${tokenStream.currentToken}",
@@ -261,6 +285,47 @@ class Parser(lexer: Lexer) {
         )
     }
 
+    private fun parseArrayLiteral(): ArrayLiteralNode {
+        if (tokenStream.currentToken.type != TokenType.LBRACKET)
+            throw SyntaxError(
+                "Expected '[' at the start of an array literal, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        val values = mutableListOf<ExpressionNode>()
+
+        while (tokenStream.currentToken.type != TokenType.RBRACKET && !tokenStream.currentToken.isEof()) {
+            val expr = parseExpression()
+
+            values.add(expr)
+
+            if (tokenStream.currentToken.type == TokenType.COMMA) {
+                if (tokenStream.nextToken.type == TokenType.RBRACKET)
+                    throw SyntaxError(
+                        "Expected more array values after ',', got ${tokenStream.nextToken}",
+                        currentLine
+                    )
+
+                tokenStream.consume()
+                continue
+            }
+        }
+
+        if (tokenStream.currentToken.type != TokenType.RBRACKET)
+            throw SyntaxError(
+                "Expected ']' after array literal value list, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        return ArrayLiteralNode(line, values)
+    }
+
     private fun parseReturnStatement(): ReturnStatementNode {
         if (tokenStream.currentToken.type != TokenType.KW_RETURN)
             throw SyntaxError(
@@ -406,6 +471,7 @@ class Parser(lexer: Lexer) {
             TokenType.LPAREN      -> parseSubExpression()
             TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
             TokenType.KW_NEW      -> parseComplexTypeInstantiation()
+            TokenType.LBRACKET    -> parseArrayLiteral()
             else                  -> null
         }
 
