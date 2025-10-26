@@ -8,7 +8,6 @@ import dev.vanadium.avo.syntax.lexer.Token
 import dev.vanadium.avo.syntax.lexer.TokenStream
 import dev.vanadium.avo.syntax.lexer.TokenType
 import java.util.*
-import kotlin.math.exp
 
 class Parser(lexer: Lexer) {
     private val tokenStream = TokenStream(lexer)
@@ -459,7 +458,7 @@ class Parser(lexer: Lexer) {
         // Handle member accesses, calls, and index accesses
         while (true) {
             factor = when (tokenStream.currentToken.type) {
-                TokenType.DOT -> {
+                TokenType.DOT      -> {
                     tokenStream.consume()
                     if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
                         throw SyntaxError("Expected member identifier", currentLine)
@@ -468,14 +467,14 @@ class Parser(lexer: Lexer) {
                     MemberAccessNode(factor.line, factor, member)
                 }
 
-                TokenType.LPAREN -> {
+                TokenType.LPAREN   -> {
                     val params = parseCallParameters()
                     ExpressionCallNode(factor.line, factor, params)
                 }
 
                 TokenType.LBRACKET -> parseIndexAccess(factor)
 
-                else -> break
+                else               -> break
             }
         }
 
@@ -600,15 +599,12 @@ class Parser(lexer: Lexer) {
 
         tokenStream.consume()
 
-        if (tokenStream.currentToken.type != TokenType.COLON)
-            throw SyntaxError(
-                "Expected ':' after variable identifier, got ${tokenStream.currentToken}",
-                currentLine
-            )
+        var type: DataType = DataType.InferredType
 
-        tokenStream.consume()
-
-        val type = parseDataType()
+        if (tokenStream.currentToken.type == TokenType.COLON) {
+            tokenStream.consume()
+            type = parseDataType()
+        }
 
         if (tokenStream.currentToken.type != TokenType.EQUALS) {
             return VariableDeclarationNode(line, id, type, null)

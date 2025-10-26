@@ -1,10 +1,11 @@
 package dev.vanadium.avo.runtime.interpreter.expression.impl
 
 import dev.vanadium.avo.error.RuntimeError
-import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
-import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Runtime
+import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
+import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
 import dev.vanadium.avo.runtime.types.ControlFlowResult
+import dev.vanadium.avo.runtime.types.value.BooleanValue
 import dev.vanadium.avo.syntax.ast.BinaryOperationNode
 import dev.vanadium.avo.syntax.ast.BinaryOperationType
 
@@ -35,6 +36,27 @@ class BinaryOperationInterpreter(
 
         val line = node.line
 
+        // Logical Operation
+        if (node.type == BinaryOperationType.AND || node.type == BinaryOperationType.OR) {
+            if (left !is BooleanValue || right !is BooleanValue)
+                throw RuntimeError(
+                    "Cannot perform logical operation on expressions of types ${left.dataType()} and ${right.dataType()}",
+                    node.line
+                )
+
+            val leftBool = left.value
+            val rightBool = right.value
+
+            return when (node.type) {
+                BinaryOperationType.AND -> ControlFlowResult.Value(BooleanValue(leftBool && rightBool))
+                BinaryOperationType.OR  -> ControlFlowResult.Value(BooleanValue(leftBool || rightBool))
+                else                    -> throw RuntimeError(
+                    "Not a logical operation. This should never happen.",
+                    node.line
+                )
+            }
+        }
+
         return ControlFlowResult.Value(
             when (node.type) {
                 BinaryOperationType.PLUS          -> left.plus(right, line)
@@ -48,6 +70,10 @@ class BinaryOperationInterpreter(
                 BinaryOperationType.GREATER_EQUAL -> left.greaterThanOrEqualTo(right, line)
                 BinaryOperationType.LESS_EQUAL    -> left.lessThanOrEqualTo(right, line)
                 BinaryOperationType.EQUALS        -> left.equal(right, line)
+                else                              -> throw RuntimeError(
+                    "Not a mathematical operation. This should never happen.",
+                    node.line
+                )
             }
         )
     }

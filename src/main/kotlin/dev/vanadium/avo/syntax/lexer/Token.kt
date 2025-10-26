@@ -178,7 +178,11 @@ enum class TokenType {
 
     @CompoundSymbol('>', '=') GREATER_EQUAL,
 
-    @CompoundSymbol('<', '=') LESS_EQUAL;
+    @CompoundSymbol('<', '=') LESS_EQUAL,
+
+    @CompoundSymbol('&', '&') DOUBLE_AMPERSAND,
+
+    @CompoundSymbol('|', '|') DOUBLE_BAR;
 
     fun isAdditiveOperation() =
         (arrayOf(PLUS, MINUS, GREATER_THAN, LESS_THAN, GREATER_EQUAL, LESS_EQUAL, DOUBLE_EQUALS, NOT_EQUALS).contains(

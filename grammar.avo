@@ -18,15 +18,18 @@ fun rgb(r: int, g: int, b: int) -> Pixel {
     }
 }
 
-fun createImage(width: int, height: int) -> Image {
+fun createImage(width: int, height: int, initF: ((int, int) -> Pixel)) -> Image {
     var pixels: [[Pixel]]
+
+    # Initialize Pixel Buffer
     loop y 0 -> excl height {
         var row: [Pixel]
         loop x 0 -> excl width {
-            row + rgb(0, 0, 0)
+            row + initF(x, y)
         }
         pixels + row
     }
+
     return new Image {
         width = width,
         height = height,
@@ -40,12 +43,18 @@ fun writeImage(img: Image) {
     internal println("255")
     loop y 0 -> excl img.height {
         loop x 0 -> excl img.width {
-            var px: Pixel = img.pixels[y][x]
+            var px = img.pixels[y][x]
             internal print(px.r + " " + px.g + " " + px.b + " ")
         }
         internal println("")
     }
 }
 
-var img: ? = createImage(100, 100)
+var width = 200
+var height = 200
+
+var img = createImage(width, height, fun (x: int, y: int) -> Pixel {
+    return rgb(46, 133, 255)
+})
+
 writeImage(img)
