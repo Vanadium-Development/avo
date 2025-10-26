@@ -164,6 +164,8 @@ enum class TokenType {
 
     @Symbol('%') PERCENT,
 
+    @Symbol('|') BAR,
+
     //
     // Compound Symbols
     //

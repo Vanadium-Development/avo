@@ -32,12 +32,9 @@ fun exp(d: float) -> float {
     return internal exp(d)
 }
 
-var messages: [[string]] = [["Michael", "Dolezal"]];
+var messages: [[string]] = [["Michael", "Dolezal"], ["Hans", "Berger"]];
 
-messages[0][0] = "Test"
-
-println("Hello, " + messages[0][0] + " " + messages[0][1] + "!");
-
-(var sayHi: (() -> void) = fun {
-    println("Hello, World!")
-})()
+loop i 0 -> excl |messages| {
+    var element: ? = messages[i]
+    println(element[0] + " " + element[1])
+}

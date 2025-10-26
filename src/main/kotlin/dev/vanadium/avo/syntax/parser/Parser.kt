@@ -480,6 +480,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_INTERNAL -> parseInternalFunctionCallExpression()
             TokenType.KW_NEW      -> parseComplexTypeInstantiation()
             TokenType.LBRACKET    -> parseArrayLiteral()
+            TokenType.BAR         -> parseLengthExpression()
             else                  -> null
         }
 
@@ -519,6 +520,30 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return IndexAccessNode(line, target, index)
+    }
+
+    private fun parseLengthExpression(): LengthExpressionNode {
+        if (tokenStream.currentToken.type != TokenType.BAR)
+            throw SyntaxError(
+                "Expected '|' at the start of a length expression, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        val expr = parseExpression()
+
+        if (tokenStream.currentToken.type != TokenType.BAR)
+            throw SyntaxError(
+                "Expected '|' after length expression, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        return LengthExpressionNode(line, expr)
     }
 
     private fun parseMemberAccess(base: ExpressionNode): ExpressionNode {
