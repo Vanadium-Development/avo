@@ -10,6 +10,10 @@ complex Image {
     pixels: [[Pixel]]
 }
 
+fun sqrt(d: float) -> float {
+    return internal sqrt(d)
+}
+
 fun rgb(r: int, g: int, b: int) -> Pixel {
     return new Pixel {
         r = r,
@@ -54,11 +58,10 @@ var width = 200
 var height = 200
 
 var img = createImage(width, height, fun (x: int, y: int) -> Pixel {
-    if x > 100 && y < 100 {
-        return rgb(0, 255, 0)
-    } else {
-    	return rgb(255, 0, 0)
+    if sqrt(((x - (width/2))^2 + (y - (height/2))^2) + 0.0) < 90 {
+        return rgb(255, 0, 0)
     }
+    return rgb(0, 0, 0)
 })
 
 writeImage(img)
