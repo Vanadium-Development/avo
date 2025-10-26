@@ -18,31 +18,52 @@ class Parser(lexer: Lexer) {
         val nodes = mutableListOf<Node>()
 
         var moduleDefinition: ModuleDefinitionNode? = null
+        val imports = mutableListOf<ModuleImportNode>()
 
         while (!tokenStream.currentToken.isEof()) {
             val node = parseAny()
 
+            // Module definition (must be at the top of the source)
             if (node is ModuleDefinitionNode) {
-                if (moduleDefinition == null) {
-                    moduleDefinition = node
-                    continue
-                }
+                if (moduleDefinition != null)
+                    throw SyntaxError(
+                        "Module ${moduleDefinition.identifier.asIdentifier()} is already defined on line ${moduleDefinition.line}. " +
+                        "Attempted re-definition on line ${node.line}",
+                        node.line
+                    )
 
-                throw SyntaxError(
-                    "Module ${moduleDefinition.identifier.asIdentifier()} is already defined on line ${moduleDefinition.line}. " +
-                    "Attempted re-definition on line ${node.line}",
-                    node.line
-                )
-            } else if (moduleDefinition == null) {
-                throw SyntaxError(
-                    "Expected module definition at the top of the source file.",
-                    node.line
-                )
+                if (nodes.isNotEmpty() || imports.isNotEmpty())
+                    throw SyntaxError(
+                        "Module definition must be at the top of the file",
+                        node.line
+                    )
+
+                moduleDefinition = node
+                continue
+            }
+
+            // Imports must directly follow the module definition
+            if (node is ModuleImportNode) {
+                if (nodes.isNotEmpty())
+                    throw SyntaxError(
+                        "Module import must be placed after the module definition",
+                        node.line
+                    )
+
+                imports.add(node)
+                continue
             }
 
             nodes.add(node)
         }
-        return ModuleNode(nodes, 1, "main")
+
+        if (moduleDefinition == null)
+            throw SyntaxError(
+                "A module definition must be present at the top of the file",
+                currentLine
+            )
+
+        return ModuleNode(nodes, 1, "main", imports)
     }
 
     private fun parseAny(): Node {
@@ -52,6 +73,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_BREAK    -> parseBreakStatement()
             TokenType.KW_COMPLEX  -> parseComplexTypeDefinition()
             TokenType.KW_MODULE   -> parseModuleDefinition()
+            TokenType.KW_IMPORT   -> parseModuleImport()
             else                  -> null
         }
 
@@ -86,6 +108,30 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return ModuleDefinitionNode(line, identifier)
+    }
+
+    private fun parseModuleImport(): ModuleImportNode {
+        if (tokenStream.currentToken.type != TokenType.KW_IMPORT)
+            throw SyntaxError(
+                "Expected 'import' keyword, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw SyntaxError(
+                "Expected identifier of module to import, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val identifier = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        return ModuleImportNode(line, identifier)
     }
 
     private fun parseLambdaType(): DataType.LambdaType {

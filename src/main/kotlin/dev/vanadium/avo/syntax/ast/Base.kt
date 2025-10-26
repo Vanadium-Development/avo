@@ -14,11 +14,18 @@ open class StatementNode(
     override val line: Int
 ) : Node(line)
 
+data class ModuleImportNode(
+    @Transient
+    override val line: Int,
+    val identifier: Token
+) : Node(line)
+
 data class ModuleNode(
     val nodes: List<Node>,
     @Transient
     override val line: Int,
-    val name: String
+    val name: String,
+    val imports: List<ModuleImportNode>
 ) : Node(line)
 
 data class ModuleDefinitionNode(

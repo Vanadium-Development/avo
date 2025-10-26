@@ -118,6 +118,8 @@ enum class TokenType {
 
     @Keyword("module") KW_MODULE,
 
+    @Keyword("import") KW_IMPORT,
+
     //
     // Symbols
     //
