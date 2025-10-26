@@ -8,6 +8,7 @@ import dev.vanadium.avo.syntax.lexer.Token
 import dev.vanadium.avo.syntax.lexer.TokenStream
 import dev.vanadium.avo.syntax.lexer.TokenType
 import java.util.*
+import kotlin.math.exp
 
 class Parser(lexer: Lexer) {
     private val tokenStream = TokenStream(lexer)
@@ -183,11 +184,24 @@ class Parser(lexer: Lexer) {
                     type
                 )
             )
+
+            if (tokenStream.currentToken.type == TokenType.COMMA) {
+                if (tokenStream.nextToken.type == TokenType.RBRACE)
+                    throw SyntaxError(
+                        "Expected complex type field after ',', got ${tokenStream.nextToken}",
+                        currentLine
+                    )
+
+                tokenStream.consume()
+                continue
+            }
+
+            break
         }
 
         if (tokenStream.currentToken.type != TokenType.RBRACE)
             throw SyntaxError(
-                "Expected '}' after field list of complex type ${id.asIdentifier()}",
+                "Expected '}' after field list, or ',' and more fields of complex type ${id.asIdentifier()}",
                 currentLine
             )
 
@@ -262,11 +276,24 @@ class Parser(lexer: Lexer) {
                     fieldExpr
                 )
             )
+
+            if (tokenStream.currentToken.type == TokenType.COMMA) {
+                if (tokenStream.nextToken.type == TokenType.RBRACE)
+                    throw SyntaxError(
+                        "Expected instance field after ',', got ${tokenStream.nextToken}",
+                        currentLine
+                    )
+
+                tokenStream.consume()
+                continue
+            }
+
+            break
         }
 
         if (tokenStream.currentToken.type != TokenType.RBRACE)
             throw SyntaxError(
-                "Expected '}' after instance fields of ${type.identifier}, got ${tokenStream.currentToken}",
+                "Expected '}' after instance field list, or ',' and more fields of ${type.identifier}, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -306,18 +333,20 @@ class Parser(lexer: Lexer) {
             if (tokenStream.currentToken.type == TokenType.COMMA) {
                 if (tokenStream.nextToken.type == TokenType.RBRACKET)
                     throw SyntaxError(
-                        "Expected more array values after ',', got ${tokenStream.nextToken}",
+                        "Expected array element after ',', got ${tokenStream.nextToken}",
                         currentLine
                     )
 
                 tokenStream.consume()
                 continue
             }
+
+            break
         }
 
         if (tokenStream.currentToken.type != TokenType.RBRACKET)
             throw SyntaxError(
-                "Expected ']' after array literal value list, got ${tokenStream.currentToken}",
+                "Expected ']' after array literal value list, or ',' and more values, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -427,24 +456,28 @@ class Parser(lexer: Lexer) {
     private fun parseFactor(): ExpressionNode {
         var factor = parsePrimaryFactor()
 
-        // Expression Call
-        if (tokenStream.currentToken.type == TokenType.LPAREN) {
-            // Handle a number of consecutive calls on the same expressions
-            while (tokenStream.currentToken.type == TokenType.LPAREN) {
-                val params = parseCallParameters()
-                factor = ExpressionCallNode(factor.line, factor, params)
+        // Handle member accesses, calls, and index accesses
+        while (true) {
+            factor = when (tokenStream.currentToken.type) {
+                TokenType.DOT -> {
+                    tokenStream.consume()
+                    if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+                        throw SyntaxError("Expected member identifier", currentLine)
+                    val member = tokenStream.currentToken
+                    tokenStream.consume()
+                    MemberAccessNode(factor.line, factor, member)
+                }
+
+                TokenType.LPAREN -> {
+                    val params = parseCallParameters()
+                    ExpressionCallNode(factor.line, factor, params)
+                }
+
+                TokenType.LBRACKET -> parseIndexAccess(factor)
+
+                else -> break
             }
         }
-
-        // Array Access
-        if (tokenStream.currentToken.type == TokenType.LBRACKET) {
-            // Handle a number of consecutive accesses
-            while (tokenStream.currentToken.type == TokenType.LBRACKET) {
-                factor = parseIndexAccess(factor)
-            }
-        }
-
-        factor = parseMemberAccess(factor)
 
         if (tokenStream.currentToken.type == TokenType.EQUALS)
             return parseVariableAssignment(factor)
@@ -544,33 +577,6 @@ class Parser(lexer: Lexer) {
         tokenStream.consume()
 
         return LengthExpressionNode(line, expr)
-    }
-
-    private fun parseMemberAccess(base: ExpressionNode): ExpressionNode {
-        var expr: ExpressionNode = base
-
-        while (tokenStream.currentToken.type == TokenType.DOT) {
-            tokenStream.consume()
-
-            if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
-                throw SyntaxError(
-                    "Expected member identifier after '.', got ${tokenStream.currentToken}",
-                    currentLine
-                )
-
-            val member = tokenStream.currentToken
-            tokenStream.consume()
-
-            expr = MemberAccessNode(expr.line, expr, member)
-
-            // Check if this member is immediately called
-            if (tokenStream.currentToken.type == TokenType.LPAREN) {
-                val params = parseCallParameters()
-                expr = ExpressionCallNode(expr.line, expr, params)
-            }
-        }
-
-        return expr
     }
 
     private fun parseVariableDeclaration(): VariableDeclarationNode {
@@ -774,17 +780,20 @@ class Parser(lexer: Lexer) {
             if (tokenStream.currentToken.type == TokenType.COMMA) {
                 if (tokenStream.nextToken.type == TokenType.RPAREN)
                     throw SyntaxError(
-                        "Expected more function definition parameters after ',', got ${tokenStream.currentToken}",
+                        "Expected function signature parameter after ',', got ${tokenStream.nextToken}",
                         currentLine
                     )
+
                 tokenStream.consume()
                 continue
             }
+
+            break
         }
 
         if (tokenStream.currentToken.type != TokenType.RPAREN)
             throw SyntaxError(
-                "Reached end of file while parsing function signature",
+                "Expected ')' at the end of a function signature, or ',' and more parameters, got ${tokenStream.currentToken}",
                 currentLine
             )
 
@@ -850,21 +859,22 @@ class Parser(lexer: Lexer) {
             parameters.add(ExpressionCallNode.CallParameter(expr))
 
             if (tokenStream.currentToken.type == TokenType.COMMA) {
-                if (tokenStream.nextToken.type == TokenType.RPAREN)
+                if (tokenStream.nextToken.type == TokenType.RBRACE)
                     throw SyntaxError(
-                        "Expected more function call parameters after ',', got ${tokenStream.currentToken}",
+                        "Expected call parameter after ',', got ${tokenStream.nextToken}",
                         currentLine
                     )
 
                 tokenStream.consume()
-
                 continue
             }
+
+            break
         }
 
         if (tokenStream.currentToken.type != TokenType.RPAREN)
             throw SyntaxError(
-                "Expected ')' after function call parameter list, got ${tokenStream.currentToken}",
+                "Expected ')' after function call parameter list or ',' and more parameters, got ${tokenStream.currentToken}",
                 currentLine
             )
 

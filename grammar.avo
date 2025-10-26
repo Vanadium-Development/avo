@@ -1,40 +1,51 @@
-
-# Standard Library Bindings
-fun print(str: string) {
-    internal print(str)
+complex Pixel {
+    r: int,
+    g: int,
+    b: int
 }
 
-fun println(str: string) {
-    internal println(str)
+complex Image {
+    width: int,
+    height: int,
+    pixels: [[Pixel]]
 }
 
-fun sqrt(d: float) -> float {
-    return internal sqrt(d)
+fun rgb(r: int, g: int, b: int) -> Pixel {
+    return new Pixel {
+        r = r,
+        g = g,
+        b = b
+    }
 }
 
-fun pow(d: float, exponent: float) -> float {
-    return internal pow(d, exponent)
+fun createImage(width: int, height: int) -> Image {
+    var pixels: [[Pixel]]
+    loop y 0 -> excl height {
+        var row: [Pixel]
+        loop x 0 -> excl width {
+            row + rgb(0, 0, 0)
+        }
+        pixels + row
+    }
+    return new Image {
+        width = width,
+        height = height,
+        pixels = pixels
+    }
 }
 
-fun sin(d: float) -> float {
-    return internal sin(d)
+fun writeImage(img: Image) {
+    internal println("P3")
+    internal println("" + img.width + " " + img.height)
+    internal println("255")
+    loop y 0 -> excl img.height {
+        loop x 0 -> excl img.width {
+            var px: Pixel = img.pixels[y][x]
+            internal print(px.r + " " + px.g + " " + px.b + " ")
+        }
+        internal println("")
+    }
 }
 
-fun cos(d: float) -> float {
-    return internal cos(d)
-}
-
-fun tan(d: float) -> float {
-    return internal tan(d)
-}
-
-fun exp(d: float) -> float {
-    return internal exp(d)
-}
-
-var messages: [[string]] = [["Michael", "Dolezal"], ["Hans", "Berger"]];
-
-loop i 0 -> excl |messages| {
-    var element: ? = messages[i]
-    println(element[0] + " " + element[1])
-}
+var img: ? = createImage(100, 100)
+writeImage(img)

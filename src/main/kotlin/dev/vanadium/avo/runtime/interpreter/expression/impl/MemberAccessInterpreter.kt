@@ -22,7 +22,7 @@ class MemberAccessInterpreter(runtime: Runtime) : ExpressionInterpreter<MemberAc
 
         if (receiver !is InstanceValue)
             throw RuntimeError(
-                "Member access is only permitted on complex type instances",
+                "Member access is only permitted on complex type instances, attempted on ${receiver.dataType()}",
                 node.line
             )
 

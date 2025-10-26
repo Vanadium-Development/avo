@@ -1,14 +1,28 @@
 package dev.vanadium.avo.syntax.lexer
 
+import com.github.ajalt.mordant.input.InputEvent
 import dev.vanadium.avo.error.LexerError
 
 fun Char.isIdentifierChar(): Boolean {
     return isLetter() || this == '_'
 }
 
-class Lexer(val input: String) {
+class Lexer(var input: String) {
     private var position = 0
     private var line = 1
+
+    val currentPosition get() = position
+    val currentLine get() = line
+
+    fun reset(newInput: String) {
+        position = 0
+        line = 1
+        input = newInput
+    }
+
+    fun resetPosition(position: Int) {
+        this.position = position
+    }
 
     private fun peek(): Char? {
         return input.getOrNull(position)
