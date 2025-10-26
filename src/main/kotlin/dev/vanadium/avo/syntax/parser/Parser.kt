@@ -436,6 +436,14 @@ class Parser(lexer: Lexer) {
             }
         }
 
+        // Array Access
+        if (tokenStream.currentToken.type == TokenType.LBRACKET) {
+            // Handle a number of consecutive accesses
+            while (tokenStream.currentToken.type == TokenType.LBRACKET) {
+                factor = parseIndexAccess(factor)
+            }
+        }
+
         factor = parseMemberAccess(factor)
 
         if (tokenStream.currentToken.type == TokenType.EQUALS)
@@ -487,6 +495,30 @@ class Parser(lexer: Lexer) {
             "Expected an expression factor, got ${tokenStream.currentToken}",
             currentLine
         )
+    }
+
+    private fun parseIndexAccess(target: ExpressionNode): IndexAccessNode {
+        if (tokenStream.currentToken.type != TokenType.LBRACKET)
+            throw SyntaxError(
+                "Expected '[' at the start of an index access, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        val index = parseExpression()
+
+        if (tokenStream.currentToken.type != TokenType.RBRACKET)
+            throw SyntaxError(
+                "Expected ']' after index access expression, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        tokenStream.consume()
+
+        return IndexAccessNode(line, target, index)
     }
 
     private fun parseMemberAccess(base: ExpressionNode): ExpressionNode {

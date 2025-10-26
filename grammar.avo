@@ -30,9 +30,13 @@ fun tan(d: float) -> float {
 
 fun exp(d: float) -> float {
     return internal exp(d)
-};
+}
 
-var messages: [string] = ["Test", 1];
+var messages: [[string]] = [["Michael", "Dolezal"]];
+
+messages[0][0] = "Test"
+
+println("Hello, " + messages[0][0] + " " + messages[0][1] + "!");
 
 (var sayHi: (() -> void) = fun {
     println("Hello, World!")

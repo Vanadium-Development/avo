@@ -6,11 +6,13 @@ import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
 import dev.vanadium.avo.runtime.types.ControlFlowResult
 import dev.vanadium.avo.runtime.types.Symbol
+import dev.vanadium.avo.runtime.types.value.ArrayValue
 import dev.vanadium.avo.runtime.types.value.InstanceValue
+import dev.vanadium.avo.runtime.types.value.IntegerValue
 import dev.vanadium.avo.syntax.ast.AssignmentNode
+import dev.vanadium.avo.syntax.ast.IndexAccessNode
 import dev.vanadium.avo.syntax.ast.MemberAccessNode
 import dev.vanadium.avo.syntax.ast.SymbolReferenceNode
-import kotlin.math.exp
 
 @ExpressionInterpreterImplementation
 class AssignmentInterpreter(runtime: Runtime) :
@@ -70,7 +72,60 @@ class AssignmentInterpreter(runtime: Runtime) :
                     )
                 instanceValue.fields[target.member.value] = expr
             }
-            else -> {
+
+            is IndexAccessNode     -> {
+                // TODO DRY
+                val targetResult = evaluateOther(target.target)
+
+                if (targetResult !is ControlFlowResult.Value)
+                    throw RuntimeError(
+                        "Index access target cannot valuate to a ${targetResult.name()}",
+                        node.line
+                    )
+
+                val targetValue = targetResult.runtimeValue
+
+                if (targetValue !is ArrayValue)
+                    throw RuntimeError(
+                        "Cannot perform index assignment on type ${targetValue.dataType()}",
+                        node.line
+                    )
+
+                if (targetValue.type.elementType != exprType)
+                    throw RuntimeError(
+                        "Cannot assign expression of type $exprType to element of array of type ${targetValue.type}",
+                        node.line
+                    )
+
+                val indexResult = evaluateOther(target.index)
+
+                if (indexResult !is ControlFlowResult.Value)
+                    throw RuntimeError(
+                        "Index expression cannot evaluate to a ${indexResult.name()}",
+                        node.line
+                    )
+
+                val indexValue = indexResult.runtimeValue
+
+                if (indexValue !is IntegerValue)
+                    throw RuntimeError(
+                        "Cannot use value of type ${indexValue.dataType()} as index",
+                        node.line
+                    )
+
+                val index = indexValue.value
+                val arraySize = targetValue.value.size
+
+                if (index !in 0..<arraySize)
+                    throw RuntimeError(
+                        "Cannot assign element at index $index in array of size $arraySize",
+                        node.line
+                    )
+
+                targetValue.value[index] = expr
+            }
+
+            else                   -> {
                 throw RuntimeError(
                     "Invalid assignment target",
                     node.target.line
