@@ -14,7 +14,16 @@ class BlockExpressionInterpreter(runtime: Runtime) : ExpressionInterpreter<Block
     override fun evaluate(node: BlockExpressionNode): ControlFlowResult {
         for (blockNode in node.nodes) {
             val expr = when (blockNode) {
-                is ReturnStatementNode       -> return evaluateOther(blockNode.expression)
+                is ReturnStatementNode       -> {
+                    val returnResult = evaluateOther(blockNode.expression)
+                    if (returnResult !is ControlFlowResult.Value)
+                        throw RuntimeError(
+                            "Return expression cannot evaluate to a ${returnResult.name()}",
+                            blockNode.line
+                        )
+                    return ControlFlowResult.Return(returnResult.runtimeValue)
+                }
+
                 is ContinueStatementNode     -> return ControlFlowResult.Continue()
                 is BreakStatementNode        -> return ControlFlowResult.Break()
                 is ExpressionNode            -> evaluateOther(blockNode)
@@ -25,7 +34,7 @@ class BlockExpressionInterpreter(runtime: Runtime) : ExpressionInterpreter<Block
                 )
             }
 
-            if (expr is ControlFlowResult.Break || expr is ControlFlowResult.Continue) {
+            if (expr is ControlFlowResult.Return || expr is ControlFlowResult.Continue || expr is ControlFlowResult.Break) {
                 return expr
             }
         }

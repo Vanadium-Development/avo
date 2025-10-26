@@ -21,7 +21,7 @@ class AssignmentInterpreter(runtime: Runtime) :
         val exprResult = evaluateOther(node.value)
         if (exprResult !is ControlFlowResult.Value)
             throw RuntimeError(
-                "Variable assignment value cannot evaluate to a ${exprResult.name()}",
+                "Unexpected ${exprResult.name()} in a variable assignment value",
                 node.line
             )
 
@@ -101,7 +101,7 @@ class AssignmentInterpreter(runtime: Runtime) :
 
                 if (indexResult !is ControlFlowResult.Value)
                     throw RuntimeError(
-                        "Index expression cannot evaluate to a ${indexResult.name()}",
+                        "Unexpected ${indexResult.name()} in an index expression",
                         node.line
                     )
 

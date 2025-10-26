@@ -54,7 +54,11 @@ var width = 200
 var height = 200
 
 var img = createImage(width, height, fun (x: int, y: int) -> Pixel {
-    return rgb(46, 133, 255)
+    if x > 100 && y < 100 {
+        return rgb(0, 255, 0)
+    } else {
+    	return rgb(255, 0, 0)
+    }
 })
 
 writeImage(img)

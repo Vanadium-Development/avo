@@ -14,7 +14,7 @@ sealed class Symbol {
         val block: BlockExpressionNode
     ) : Symbol() {
         fun name(): String {
-            return identifier ?: "<anonymous function>"
+            return if (identifier == null) "<anonymous>" else "\"$identifier\""
         }
     }
 

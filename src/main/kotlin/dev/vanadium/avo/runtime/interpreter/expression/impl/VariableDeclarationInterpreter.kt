@@ -47,7 +47,7 @@ class VariableDeclarationInterpreter(runtime: Runtime) :
             val exprResult = evaluateOther(node.value)
             if (exprResult !is ControlFlowResult.Value)
                 throw RuntimeError(
-                    "Variable declaration value cannot evaluate to a ${exprResult.name()}",
+                    "Unexpected ${exprResult.name()} in a variable declaration expression",
                     node.line
                 )
             expr = exprResult.runtimeValue

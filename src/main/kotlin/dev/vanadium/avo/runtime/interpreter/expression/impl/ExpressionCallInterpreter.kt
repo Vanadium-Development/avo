@@ -2,11 +2,13 @@ package dev.vanadium.avo.runtime.interpreter.expression.impl
 
 import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.Scope
-import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
-import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.Runtime
+import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
+import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
 import dev.vanadium.avo.runtime.types.ControlFlowResult
+import dev.vanadium.avo.runtime.types.DataType
 import dev.vanadium.avo.runtime.types.value.LambdaValue
+import dev.vanadium.avo.runtime.types.value.VoidValue
 import dev.vanadium.avo.syntax.ast.ExpressionCallNode
 
 @ExpressionInterpreterImplementation
@@ -42,6 +44,7 @@ class ExpressionCallInterpreter(runtime: Runtime) : ExpressionInterpreter<Expres
 
         val params = function.signature.zip(node.parameters)
 
+        // Validate Parameters and Create Parameter Variables
         params.forEachIndexed { i, param ->
             val valueResult = evaluateOther(param.second.expression)
 
@@ -66,25 +69,33 @@ class ExpressionCallInterpreter(runtime: Runtime) : ExpressionInterpreter<Expres
 
         pushScope(functionScope)
         val returnResult: ControlFlowResult = evaluateOther(function.block)
+        val line = function.block.line
 
-        if (returnResult !is ControlFlowResult.Value)
+        // Non-Void Function Does Not Return a Value
+        if (function.returnType != DataType.VoidType && returnResult !is ControlFlowResult.Return)
             throw RuntimeError(
-                "Unexpected ${returnResult.name()} in Function",
-                function.block.line
+                "Function ${function.name()} does not return a value on all control paths",
+                line
             )
 
-        val returnValue = returnResult.runtimeValue
-
-        if (function.returnType != returnValue.dataType()) {
-            throw RuntimeError(
-                "Function ${function.returnType} of type ${function.returnType} returns ${returnValue.dataType()} on a control path",
-                function.block.line
+        val returnValue = when (returnResult) {
+            is ControlFlowResult.Return -> returnResult.returnValue
+            is ControlFlowResult.Value  -> returnResult.runtimeValue
+            else                        -> throw RuntimeError(
+                "Unexpected ${returnResult.name()} in function",
+                line
             )
         }
+
+        if (returnValue.dataType() != function.returnType)
+            throw RuntimeError(
+                "Function ${function.name()} is defined with return type ${function.returnType}, but returns ${returnValue.dataType()} on a control path",
+                line
+            )
 
         // Leave the function scope
         popScope()
 
-        return returnResult
+        return ControlFlowResult.Value(returnValue)
     }
 }

@@ -18,7 +18,7 @@ class ConditionalExpressionInterpreter(runtime: Runtime) :
 
             if (conditionResult !is ControlFlowResult.Value)
                 throw RuntimeError(
-                    "Conditional expression cannot evaluate to a ${conditionResult.name()}",
+                    "Conditional expression condition cannot evaluate to a ${conditionResult.name()}",
                     node.line
                 )
 
@@ -26,7 +26,7 @@ class ConditionalExpressionInterpreter(runtime: Runtime) :
 
             if (condition !is BooleanValue)
                 throw RuntimeError(
-                    "Conditional expression must be a boolean value.",
+                    "Conditional expression condition must be a boolean value",
                     node.line
                 )
 

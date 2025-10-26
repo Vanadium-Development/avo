@@ -9,6 +9,10 @@ sealed class ControlFlowResult {
         override fun name() = "Runtime Value"
     }
 
+    class Return(val returnValue: RuntimeValue) : ControlFlowResult() {
+        override fun name() = "Return Value"
+    }
+
     class Break : ControlFlowResult() {
         override fun name() = "Break Statement"
     }
