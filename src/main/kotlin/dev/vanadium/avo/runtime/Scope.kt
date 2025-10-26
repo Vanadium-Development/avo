@@ -3,7 +3,9 @@ package dev.vanadium.avo.runtime
 import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.types.ComplexType
 import dev.vanadium.avo.runtime.types.DataType
-import dev.vanadium.avo.runtime.types.Symbol
+import dev.vanadium.avo.runtime.types.symbol.Function
+import dev.vanadium.avo.runtime.types.symbol.Symbol
+import dev.vanadium.avo.runtime.types.symbol.Variable
 import dev.vanadium.avo.runtime.types.value.RuntimeValue
 import dev.vanadium.avo.syntax.ast.BlockExpressionNode
 import dev.vanadium.avo.syntax.ast.ComplexTypeDefinitionNode
@@ -51,7 +53,7 @@ data class Scope(
 
         listOf(type).validateTypes(line)
 
-        symbols[identifier] = Symbol.Variable(this, expression, type)
+        symbols[identifier] = Variable(this, expression, type)
     }
 
     /**
@@ -64,13 +66,13 @@ data class Scope(
         line: Int,
     ) {
         if (symbols.containsKey(identifier)) {
-            if (symbols[identifier] !is Symbol.Variable)
+            if (symbols[identifier] !is Variable)
                 throw RuntimeError(
                     "Symbol is not a variable: $identifier",
                     line
                 )
 
-            (symbols[identifier] as Symbol.Variable).value = expression
+            (symbols[identifier] as Variable).value = expression
             return
         }
 
@@ -110,7 +112,7 @@ data class Scope(
         returnType: DataType,
         block: BlockExpressionNode,
         line: Int
-    ): Symbol.Function {
+    ): Function {
         val formattedIdentifier = if (identifier == null) "<anonymous>" else "\"$identifier\""
 
         signature.map { it.identifier.value }.findFirstDuplicate() ifPresent {
@@ -124,7 +126,7 @@ data class Scope(
 
         // Anonymous Function
         if (identifier == null) {
-            return Symbol.Function(Scope(capture()), identifier, signature, returnType, block)
+            return Function(Scope(capture()), identifier, signature, returnType, block)
         }
 
         if (isSymbolIdentifierTaken(identifier)) {
@@ -134,8 +136,8 @@ data class Scope(
             )
         }
 
-        symbols[identifier] = Symbol.Function(this, identifier, signature, returnType, block)
-        val function = Symbol.Function(Scope(capture()), identifier, signature, returnType, block)
+        symbols[identifier] = Function(this, identifier, signature, returnType, block)
+        val function = Function(Scope(capture()), identifier, signature, returnType, block)
         symbols[identifier] = function
 
         return function

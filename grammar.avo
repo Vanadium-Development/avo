@@ -1,3 +1,5 @@
+module main
+
 complex Pixel {
     r: int,
     g: int,
@@ -65,3 +67,15 @@ var img = createImage(width, height, fun (x: int, y: int) -> Pixel {
 })
 
 writeImage(img)
+
+complex Callback {
+    cb: (() -> void)
+}
+
+var callback = new Callback {
+    cb = fun {
+        internal println("Hello, World!")
+    }
+}
+
+callback.cb()

@@ -5,7 +5,7 @@ import dev.vanadium.avo.runtime.interpreter.Runtime
 import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
 import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImplementation
 import dev.vanadium.avo.runtime.types.ControlFlowResult
-import dev.vanadium.avo.runtime.types.Symbol
+import dev.vanadium.avo.runtime.types.symbol.Variable
 import dev.vanadium.avo.runtime.types.value.ArrayValue
 import dev.vanadium.avo.runtime.types.value.InstanceValue
 import dev.vanadium.avo.runtime.types.value.IntegerValue
@@ -31,7 +31,7 @@ class AssignmentInterpreter(runtime: Runtime) :
         when (val target = node.target) {
             is SymbolReferenceNode -> {
                 val variable = scope.getSymbol(target.identifier.value, target.line)
-                if (variable !is Symbol.Variable)
+                if (variable !is Variable)
                     throw RuntimeError(
                         "Symbol \"${target.identifier.value}\" is not a variable",
                         node.line

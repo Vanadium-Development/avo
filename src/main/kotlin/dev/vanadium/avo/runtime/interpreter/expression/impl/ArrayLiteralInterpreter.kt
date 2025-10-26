@@ -31,7 +31,8 @@ class ArrayLiteralInterpreter(runtime: Runtime) :
 
             if (elementType != valueType)
                 throw RuntimeError(
-                    "Inconsistent types in array literal: First element is of type $elementType, but element $index is of type $valueType",
+                    "Inconsistent types in array literal: First element is of type $elementType, but element "
+                    + "$index is of type $valueType",
                     node.line
                 )
 

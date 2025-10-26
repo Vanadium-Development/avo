@@ -116,6 +116,8 @@ enum class TokenType {
 
     @Keyword("internal") KW_INTERNAL,
 
+    @Keyword("module") KW_MODULE,
+
     //
     // Symbols
     //

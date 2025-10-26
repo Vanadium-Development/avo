@@ -94,6 +94,7 @@ sealed class RuntimeValue {
         is LambdaValue   -> DataType.LambdaType(this.function.signature.map { it.type }, this.function.returnType)
         is InstanceValue -> DataType.ComplexTypeReferenceNode(type.identifier)
         is ArrayValue    -> DataType.ArrayType(type.elementType)
+        is ModuleValue   -> DataType.ModuleType
     }
 
 }

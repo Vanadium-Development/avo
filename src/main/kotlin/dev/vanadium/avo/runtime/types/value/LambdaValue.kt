@@ -1,9 +1,9 @@
 package dev.vanadium.avo.runtime.types.value
 
 import dev.vanadium.avo.error.RuntimeError
-import dev.vanadium.avo.runtime.types.Symbol
+import dev.vanadium.avo.runtime.types.symbol.Function
 
-data class LambdaValue(val function: Symbol.Function) : RuntimeValue() {
+data class LambdaValue(val function: Function) : RuntimeValue() {
     override fun plus(
         other: RuntimeValue,
         line: Int

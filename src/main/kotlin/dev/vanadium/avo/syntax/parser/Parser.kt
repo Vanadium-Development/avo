@@ -14,14 +14,35 @@ class Parser(lexer: Lexer) {
     private val currentLine get() = tokenStream.currentToken.line
     private val blockHierarchy = Stack<BlockExpressionNode>()
 
-    fun parse(): ProgramNode {
+    fun parse(): ModuleNode {
         val nodes = mutableListOf<Node>()
+
+        var moduleDefinition: ModuleDefinitionNode? = null
+
         while (!tokenStream.currentToken.isEof()) {
-            nodes.add(
-                parseAny()
-            )
+            val node = parseAny()
+
+            if (node is ModuleDefinitionNode) {
+                if (moduleDefinition == null) {
+                    moduleDefinition = node
+                    continue
+                }
+
+                throw SyntaxError(
+                    "Module ${moduleDefinition.identifier.asIdentifier()} is already defined on line ${moduleDefinition.line}. " +
+                    "Attempted re-definition on line ${node.line}",
+                    node.line
+                )
+            } else if (moduleDefinition == null) {
+                throw SyntaxError(
+                    "Expected module definition at the top of the source file.",
+                    node.line
+                )
+            }
+
+            nodes.add(node)
         }
-        return ProgramNode(nodes, 1)
+        return ModuleNode(nodes, 1, "main")
     }
 
     private fun parseAny(): Node {
@@ -30,6 +51,7 @@ class Parser(lexer: Lexer) {
             TokenType.KW_CONTINUE -> parseContinueStatement()
             TokenType.KW_BREAK    -> parseBreakStatement()
             TokenType.KW_COMPLEX  -> parseComplexTypeDefinition()
+            TokenType.KW_MODULE   -> parseModuleDefinition()
             else                  -> null
         }
 
@@ -40,6 +62,30 @@ class Parser(lexer: Lexer) {
             tokenStream.consume()
 
         return n
+    }
+
+    private fun parseModuleDefinition(): ModuleDefinitionNode {
+        if (tokenStream.currentToken.type != TokenType.KW_MODULE)
+            throw SyntaxError(
+                "Expected 'module' keyword at the start of a module declaration, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val line = currentLine
+
+        tokenStream.consume()
+
+        if (tokenStream.currentToken.type != TokenType.IDENTIFIER)
+            throw SyntaxError(
+                "Expected module identifier after 'module' keyword, got ${tokenStream.currentToken}",
+                currentLine
+            )
+
+        val identifier = tokenStream.currentToken
+
+        tokenStream.consume()
+
+        return ModuleDefinitionNode(line, identifier)
     }
 
     private fun parseLambdaType(): DataType.LambdaType {

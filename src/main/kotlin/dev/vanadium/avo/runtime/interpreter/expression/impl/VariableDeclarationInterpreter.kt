@@ -17,6 +17,11 @@ class VariableDeclarationInterpreter(runtime: Runtime) :
         DataType.StringType                  -> StringValue.defaultValue()
         DataType.BooleanType                 -> BooleanValue.defaultValue()
         DataType.FloatType                   -> FloatValue.defaultValue()
+        DataType.ModuleType                  -> throw RuntimeError(
+            "Module variable must be assigned upon declaration",
+            line
+        )
+
         DataType.VoidType                    -> throw RuntimeError(
             "Variable cannot be declared with void type",
             line

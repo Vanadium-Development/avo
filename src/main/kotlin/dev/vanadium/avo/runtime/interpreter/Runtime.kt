@@ -9,7 +9,7 @@ import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreterImpl
 import dev.vanadium.avo.runtime.interpreter.statement.StatementInterpreter
 import dev.vanadium.avo.runtime.types.ControlFlowResult
 import dev.vanadium.avo.syntax.ast.ExpressionNode
-import dev.vanadium.avo.syntax.ast.ProgramNode
+import dev.vanadium.avo.syntax.ast.ModuleNode
 import dev.vanadium.avo.syntax.ast.StatementNode
 import org.reflections.Reflections
 import org.reflections.scanners.Scanners
@@ -35,7 +35,7 @@ class Runtime(val functionLoader: InternalFunctionLoader) {
         scanInterpreters()
     }
 
-    fun run(program: ProgramNode, handler: ErrorHandler) {
+    fun run(program: ModuleNode, handler: ErrorHandler) {
         try {
             program.nodes.forEach {
                 when (it) {

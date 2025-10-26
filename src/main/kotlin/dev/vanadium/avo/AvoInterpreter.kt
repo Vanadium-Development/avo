@@ -6,7 +6,7 @@ import dev.vanadium.avo.error.SourceError
 import dev.vanadium.avo.error.handler.ErrorHandlingConfig
 import dev.vanadium.avo.runtime.internal.InternalFunctionLoader
 import dev.vanadium.avo.runtime.interpreter.Runtime
-import dev.vanadium.avo.syntax.ast.ProgramNode
+import dev.vanadium.avo.syntax.ast.ModuleNode
 import dev.vanadium.avo.syntax.lexer.Lexer
 import dev.vanadium.avo.syntax.parser.Parser
 import java.io.File
@@ -67,7 +67,7 @@ class AvoInterpreter(
 ) {
     private val lexer = Lexer(source)
     private lateinit var parser: Parser
-    private var program: ProgramNode? = null
+    private var program: ModuleNode? = null
     private val runtime = Runtime(functionLoader)
     private val gson = Gson().newBuilder().setPrettyPrinting().create()
 

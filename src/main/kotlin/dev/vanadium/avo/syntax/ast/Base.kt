@@ -1,5 +1,7 @@
 package dev.vanadium.avo.syntax.ast
 
+import dev.vanadium.avo.syntax.lexer.Token
+
 open class Node(open val line: Int)
 
 open class ExpressionNode(
@@ -12,8 +14,15 @@ open class StatementNode(
     override val line: Int
 ) : Node(line)
 
-data class ProgramNode(
+data class ModuleNode(
     val nodes: List<Node>,
     @Transient
-    override val line: Int
+    override val line: Int,
+    val name: String
+) : Node(line)
+
+data class ModuleDefinitionNode(
+    @Transient
+    override val line: Int,
+    val identifier: Token
 ) : Node(line)
