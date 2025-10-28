@@ -6,4 +6,6 @@ data class BlockExpressionNode(
     val nodes: List<Node>,
     @Transient
     val parent: BlockExpressionNode?
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Block Expression"
+}

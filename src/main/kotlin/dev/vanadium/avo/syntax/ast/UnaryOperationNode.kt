@@ -5,4 +5,6 @@ data class UnaryOperationNode(
     override val line: Int,
     val expression: ExpressionNode,
     val operation: UnaryOperationType
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Unary Opreation"
+}

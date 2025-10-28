@@ -1,7 +1,6 @@
 package dev.vanadium.avo.runtime.interpreter
 
-import dev.vanadium.avo.error.BaseError
-import dev.vanadium.avo.error.handler.ErrorHandler
+import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.Scope
 import dev.vanadium.avo.runtime.internal.InternalFunctionLoader
 import dev.vanadium.avo.runtime.interpreter.expression.ExpressionInterpreter
@@ -35,16 +34,16 @@ class Runtime(val functionLoader: InternalFunctionLoader) {
         scanInterpreters()
     }
 
-    fun run(program: ModuleNode, handler: ErrorHandler) {
-        try {
-            program.nodes.forEach {
-                when (it) {
-                    is ExpressionNode -> evaluate(it)
-                    is StatementNode -> execute(it)
-                }
+    fun runModule(module: ModuleNode) {
+        module.nodes.forEach { node ->
+            when (node) {
+                is ExpressionNode -> evaluate(node)
+                is StatementNode  -> execute(node)
+                else              -> throw RuntimeError(
+                    "Unknown node type: ${node.javaClass.simpleName}",
+                    node.line
+                )
             }
-        } catch (e: BaseError) {
-            handler.dispatch(e)
         }
     }
 
@@ -100,5 +99,4 @@ class Runtime(val functionLoader: InternalFunctionLoader) {
 
     /* Execute a Statement Node */
     fun execute(node: StatementNode) = statementInterpreter.execute(node)
-
 }

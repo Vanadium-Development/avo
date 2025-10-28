@@ -9,7 +9,7 @@ interface ErrorHandler {
     fun sourceError(error: SourceError)
     fun lexerError(error: LexerError)
 
-    fun dispatch(e: BaseError) {
+    fun dispatch(e: BaseError, config: ErrorHandlingConfig) {
         when (e) {
             is SyntaxError  -> syntaxError(e)
             is RuntimeError -> runtimeError(e)
@@ -18,7 +18,7 @@ interface ErrorHandler {
             else            -> Unit
         }
 
-        if (ErrorHandlingConfig.exitOnError)
+        if (config.exitOnError)
             exitProcess(1)
     }
 }

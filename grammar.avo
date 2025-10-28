@@ -1,5 +1,4 @@
 module main
-import math
 
 complex Pixel {
     r: int,
@@ -67,16 +66,6 @@ var img = createImage(width, height, fun (x: int, y: int) -> Pixel {
     return rgb(0, 0, 0)
 })
 
-writeImage(img)
-
-complex Callback {
-    cb: (() -> void)
+fun main() {
+    writeImage(img)
 }
-
-var callback = new Callback {
-    cb = fun {
-        internal println("Hello, World!")
-    }
-}
-
-callback.cb()

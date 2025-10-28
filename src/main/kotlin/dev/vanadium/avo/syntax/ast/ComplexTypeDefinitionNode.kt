@@ -13,4 +13,6 @@ class ComplexTypeDefinitionNode(
         val identifier: Token,
         val dataType: DataType
     )
+
+    override fun toString(): String = "Complex Type Definition"
 }

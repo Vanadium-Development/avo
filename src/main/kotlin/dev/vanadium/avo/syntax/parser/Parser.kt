@@ -23,6 +23,13 @@ class Parser(lexer: Lexer) {
         while (!tokenStream.currentToken.isEof()) {
             val node = parseAny()
 
+            if (node !is FunctionDefinitionNode && node !is VariableDeclarationNode && node !is ModuleDefinitionNode
+                && node !is ComplexTypeDefinitionNode)
+                throw SyntaxError(
+                    "Unexpected $node",
+                    currentLine
+                )
+
             // Module definition (must be at the top of the source)
             if (node is ModuleDefinitionNode) {
                 if (moduleDefinition != null)
@@ -32,7 +39,7 @@ class Parser(lexer: Lexer) {
                         node.line
                     )
 
-                if (nodes.isNotEmpty() || imports.isNotEmpty())
+                if (nodes.isNotEmpty())
                     throw SyntaxError(
                         "Module definition must be at the top of the file",
                         node.line
@@ -53,7 +60,6 @@ class Parser(lexer: Lexer) {
                 imports.add(node)
                 continue
             }
-
             nodes.add(node)
         }
 
@@ -63,7 +69,7 @@ class Parser(lexer: Lexer) {
                 currentLine
             )
 
-        return ModuleNode(nodes, 1, "main", imports)
+        return ModuleNode(nodes, 1, moduleDefinition.identifier.value, imports)
     }
 
     private fun parseAny(): Node {

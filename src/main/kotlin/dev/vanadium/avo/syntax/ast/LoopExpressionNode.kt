@@ -15,4 +15,6 @@ data class LoopExpressionNode(
         val expression: ExpressionNode,
         val exclusive: Boolean
     )
+
+    override fun toString(): String = "Loop Expression"
 }

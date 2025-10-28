@@ -9,4 +9,6 @@ data class VariableDeclarationNode(
     val identifier: Token,
     var type: DataType,
     val value: ExpressionNode?
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Variable Declaration"
+}

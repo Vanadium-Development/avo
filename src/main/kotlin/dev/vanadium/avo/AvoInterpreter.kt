@@ -1,104 +1,47 @@
 package dev.vanadium.avo
 
-import com.google.gson.Gson
 import dev.vanadium.avo.error.BaseError
 import dev.vanadium.avo.error.SourceError
 import dev.vanadium.avo.error.handler.ErrorHandlingConfig
+import dev.vanadium.avo.module.ModuleLoader
+import dev.vanadium.avo.module.SourceScanner
 import dev.vanadium.avo.runtime.internal.InternalFunctionLoader
 import dev.vanadium.avo.runtime.interpreter.Runtime
-import dev.vanadium.avo.syntax.ast.ModuleNode
-import dev.vanadium.avo.syntax.lexer.Lexer
-import dev.vanadium.avo.syntax.parser.Parser
 import java.io.File
-import kotlin.reflect.KClass
-
-class AvoInterpreterBuilder {
-    private var sourceCode: String? = null
-    private val functionLoader: InternalFunctionLoader = InternalFunctionLoader()
-
-    val source get() = sourceCode
-    val loader get() = functionLoader
-
-    fun errorHandling(config: ErrorHandlingConfig.() -> Unit) {
-        config(ErrorHandlingConfig)
-    }
-
-    fun sourceFile(sourceFile: () -> File) {
-        val file = sourceFile()
-        if (!file.exists())
-            throw SourceError("Source file does not exist", file.path)
-
-        sourceCode = file.readText(Charsets.UTF_8)
-    }
-
-    fun functionLoaderSource(clazz: KClass<*>) {
-        functionLoader.registerClass(clazz)
-    }
-
-    fun sourcePath(sourcePath: () -> String) {
-        val path = sourcePath()
-        val file = File(path)
-        if (!file.exists())
-            throw SourceError("Source file does not exist", path)
-
-        sourceCode = file.readText(Charsets.UTF_8)
-    }
-
-    fun source(source: () -> String) {
-        this.sourceCode = source()
-    }
-}
-
-fun Interpreter(block: AvoInterpreterBuilder.() -> Unit): AvoInterpreter? {
-    val builder = AvoInterpreterBuilder()
-    try {
-        builder.block()
-    } catch (e: BaseError) {
-        ErrorHandlingConfig.handler.dispatch(e)
-        return null
-    }
-    val src = builder.source ?: throw SourceError("No source set", "N/A")
-    return AvoInterpreter(src, builder.loader)
-}
 
 class AvoInterpreter(
-    source: String,
-    functionLoader: InternalFunctionLoader
+    val functionLoader: InternalFunctionLoader,
+    val errorHandlingConfig: ErrorHandlingConfig
 ) {
-    private val lexer = Lexer(source)
-    private lateinit var parser: Parser
-    private var program: ModuleNode? = null
     private val runtime = Runtime(functionLoader)
-    private val gson = Gson().newBuilder().setPrettyPrinting().create()
 
-    val errorHandler get() = ErrorHandlingConfig.handler
+    private val loader = ModuleLoader(
+        SourceScanner(
+            File(
+                System.getProperty("user.dir")
+            )
+        )
+    )
 
-    init {
+    fun runMainModule() {
         try {
-            parser = Parser(lexer)
-            program = parser.parse()
+            run()
         } catch (e: BaseError) {
-            ErrorHandlingConfig.handler.dispatch(e)
+            errorHandlingConfig.handler.dispatch(e, errorHandlingConfig)
         }
     }
 
-    fun run() {
-        runtime.run(program ?: return, errorHandler)
+    private fun run() {
+        loader.loadAllModules()
+        val main = loader.findMainModule()
+        val mainFunction = main.findMainFunctionDefinition()
+        val entryCall = mainFunction.noParameterCall() ?: throw SourceError(
+            "Could not invoke main function in module \"${main.module.name}\"",
+            main.path.name
+        )
+
+        main.module.nodes.add(entryCall)
+
+        runtime.runModule(main.module)
     }
-}
-
-fun AvoInterpreter?.exists(fn: AvoInterpreter.() -> Unit): AvoInterpreter? {
-    if (this == null)
-        return this
-
-    fn(this)
-    return this
-}
-
-fun AvoInterpreter?.notExists(fn: () -> Unit): AvoInterpreter? {
-    if (this != null)
-        return this
-
-    fn()
-    return this
 }

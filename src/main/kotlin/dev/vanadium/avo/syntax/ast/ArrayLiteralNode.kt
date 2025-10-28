@@ -4,4 +4,6 @@ class ArrayLiteralNode(
     @Transient
     override val line: Int,
     val values: List<ExpressionNode>
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Array Literal"
+}

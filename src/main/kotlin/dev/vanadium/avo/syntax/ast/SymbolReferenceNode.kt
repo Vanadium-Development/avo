@@ -6,4 +6,6 @@ data class SymbolReferenceNode(
     @Transient
     override val line: Int,
     val identifier: Token
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Symbol Reference"
+}

@@ -22,6 +22,10 @@ class InternalFunctionLoader {
         classList.add(constr.call())
     }
 
+    fun registerAll(vararg classes: KClass<*>) {
+        classes.forEach { registerClass(it) }
+    }
+
     fun invokeFunction(
         line: Int,
         identifier: String,

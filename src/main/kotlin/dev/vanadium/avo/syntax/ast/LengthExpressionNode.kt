@@ -4,4 +4,6 @@ class LengthExpressionNode(
     @Transient
     override val line: Int,
     val expression: ExpressionNode
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Length Expression"
+}

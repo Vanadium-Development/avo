@@ -6,4 +6,6 @@ data class MemberAccessNode(
     override val line: Int,
     val receiver: ExpressionNode,
     val member: Token
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Member Access"
+}

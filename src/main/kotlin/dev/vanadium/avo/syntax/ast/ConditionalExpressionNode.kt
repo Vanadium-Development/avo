@@ -15,4 +15,6 @@ data class ConditionalExpressionNode(
         val branches: MutableList<ConditionalExpressionBranch>,
         var defaultBranch: BlockExpressionNode?
     )
+
+    override fun toString(): String = "Conditional Expression"
 }

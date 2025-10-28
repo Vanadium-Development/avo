@@ -6,4 +6,6 @@ data class BinaryOperationNode(
     val left: ExpressionNode,
     val right: ExpressionNode,
     val type: BinaryOperationType
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Binary Operation"
+}

@@ -7,4 +7,6 @@ data class InternalFunctionCallNode(
     override val line: Int,
     val identifier: Token,
     val parameters: List<ExpressionCallNode.CallParameter>
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Internal Call"
+}

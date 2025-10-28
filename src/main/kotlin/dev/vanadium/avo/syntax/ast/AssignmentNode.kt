@@ -5,4 +5,6 @@ data class AssignmentNode(
     override val line: Int,
     val target: ExpressionNode,
     val value: ExpressionNode
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Assignment"
+}

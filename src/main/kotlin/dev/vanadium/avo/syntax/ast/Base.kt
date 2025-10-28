@@ -2,14 +2,16 @@ package dev.vanadium.avo.syntax.ast
 
 import dev.vanadium.avo.syntax.lexer.Token
 
-open class Node(open val line: Int)
+abstract class Node(open val line: Int) {
+    abstract override fun toString(): String
+}
 
-open class ExpressionNode(
+abstract class ExpressionNode(
     @Transient
     override val line: Int
 ) : Node(line)
 
-open class StatementNode(
+abstract class StatementNode(
     @Transient
     override val line: Int
 ) : Node(line)
@@ -18,18 +20,24 @@ data class ModuleImportNode(
     @Transient
     override val line: Int,
     val identifier: Token
-) : Node(line)
+) : Node(line) {
+    override fun toString(): String = "Module Import Node"
+}
 
 data class ModuleNode(
-    val nodes: List<Node>,
+    val nodes: MutableList<Node>,
     @Transient
     override val line: Int,
     val name: String,
     val imports: List<ModuleImportNode>
-) : Node(line)
+) : Node(line) {
+    override fun toString(): String = "Module Node"
+}
 
 data class ModuleDefinitionNode(
     @Transient
     override val line: Int,
     val identifier: Token
-) : Node(line)
+) : Node(line) {
+    override fun toString(): String = "Module Definition"
+}

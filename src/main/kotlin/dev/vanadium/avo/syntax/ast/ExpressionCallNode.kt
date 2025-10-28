@@ -7,4 +7,5 @@ data class ExpressionCallNode(
     val parameters: List<CallParameter>
 ) : ExpressionNode(line) {
     data class CallParameter(val expression: ExpressionNode)
+    override fun toString(): String = "Call Expression"
 }

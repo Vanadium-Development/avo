@@ -20,6 +20,7 @@ sealed class LiteralNode(
         override fun runtimeValue(): RuntimeValue {
             return IntegerValue(value)
         }
+        override fun toString(): String = "Integer Literal"
     }
 
     data class FloatLiteral(
@@ -30,6 +31,7 @@ sealed class LiteralNode(
         override fun runtimeValue(): RuntimeValue {
             return FloatValue(value)
         }
+        override fun toString(): String = "Float Literal"
     }
 
     data class StringLiteral(
@@ -40,6 +42,7 @@ sealed class LiteralNode(
         override fun runtimeValue(): RuntimeValue {
             return StringValue(value)
         }
+        override fun toString(): String = "String Literal"
     }
 
     data class BooleanLiteral(
@@ -50,5 +53,6 @@ sealed class LiteralNode(
         override fun runtimeValue(): RuntimeValue {
             return BooleanValue(value)
         }
+        override fun toString(): String = "Boolean Literal"
     }
 }

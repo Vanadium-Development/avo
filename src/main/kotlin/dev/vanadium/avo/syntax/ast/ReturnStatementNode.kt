@@ -4,4 +4,6 @@ data class ReturnStatementNode(
     @Transient
     override val line: Int,
     val expression: ExpressionNode
-) : StatementNode(line)
+) : StatementNode(line) {
+    override fun toString(): String = "Return Statement"
+}

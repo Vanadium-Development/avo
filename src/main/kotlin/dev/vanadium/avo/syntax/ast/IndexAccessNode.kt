@@ -5,4 +5,6 @@ class IndexAccessNode(
     override val line: Int,
     val target: ExpressionNode,
     val index: ExpressionNode
-) : ExpressionNode(line)
+) : ExpressionNode(line) {
+    override fun toString(): String = "Index Access"
+}

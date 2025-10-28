@@ -12,4 +12,6 @@ class InstantiationNode(
         val identifier: Token,
         val expression: ExpressionNode
     )
+
+    override fun toString(): String = "Type Instantiation"
 }
