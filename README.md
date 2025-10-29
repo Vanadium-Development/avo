@@ -8,6 +8,7 @@
 
 ```kotlin
 module main
+import std
 
 complex Pixel {
     r: int,
@@ -53,15 +54,15 @@ fun createImage(width: int, height: int, initF: ((int, int) -> Pixel)) -> Image 
 }
 
 fun writeImage(img: Image) {
-    internal println("P3")
-    internal println("" + img.width + " " + img.height)
-    internal println("255")
+    std.println("P3")
+    std.println("" + img.width + " " + img.height)
+    std.println("255")
     loop y 0 -> excl img.height {
         loop x 0 -> excl img.width {
             var px = img.pixels[y][x]
-            internal print(px.r + " " + px.g + " " + px.b + " ")
+            std.print(px.r + " " + px.g + " " + px.b + " ")
         }
-        internal println("")
+        std.println("")
     }
 }
 

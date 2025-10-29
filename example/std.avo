@@ -1,0 +1,32 @@
+module std
+
+# Console Output
+fun println(s: string) {
+    internal println(s)
+}
+
+fun print(s: string) {
+    internal print(s)
+}
+
+# Math
+fun pow(d: float, exp: float) {
+    return internal pow(d, exp)
+}
+
+fun sin(d: float) -> float {
+    return internal sin(d)
+}
+
+fun cos(d: float) -> float {
+    return internal cos(d)
+}
+
+fun tan(d: float) -> float {
+    return internal tan(d)
+}
+
+fun exp(d: float) {
+    return internal exp(d)
+}
+
