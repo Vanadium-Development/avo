@@ -83,16 +83,17 @@ fun main() {
 ### API Example
 ```kotlin
 fun main() {
-    Interpreter {
-        sourcePath { "input.avo" }
-        functionLoaderSource(InternalConsoleFunctions::class)
-        functionLoaderSource(InternalMathFunctions::class)
-        errorHandling {
-            exitOnError()
-            handlerImplementation { MordantErrorHandler }
-        }
-    }.exists {
-        run()
-    }
+    val functionLoader = InternalFunctionLoader()
+    functionLoader.registerAll(
+        InternalConsoleFunctions::class,
+        InternalMathFunctions::class
+    )
+    AvoInterpreter(
+        functionLoader = functionLoader,
+        errorHandlingConfig = ErrorHandlingConfig(
+            handler = MordantErrorHandler,
+            exitOnError = true
+        )
+    ).runMainModule()
 }
 ```

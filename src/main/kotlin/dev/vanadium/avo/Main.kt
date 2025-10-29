@@ -6,17 +6,17 @@ import dev.vanadium.avo.runtime.internal.InternalConsoleFunctions
 import dev.vanadium.avo.runtime.internal.InternalFunctionLoader
 import dev.vanadium.avo.runtime.internal.InternalMathFunctions
 
-fun main(args: Array<String>) {
+fun main() {
     val functionLoader = InternalFunctionLoader()
     functionLoader.registerAll(
         InternalConsoleFunctions::class,
         InternalMathFunctions::class
     )
     AvoInterpreter(
-        functionLoader,
-        ErrorHandlingConfig(
-            MordantErrorHandler,
-            true
+        functionLoader = functionLoader,
+        errorHandlingConfig = ErrorHandlingConfig(
+            handler = MordantErrorHandler,
+            exitOnError = true
         )
     ).runMainModule()
 }
