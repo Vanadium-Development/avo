@@ -1,16 +1,15 @@
 package dev.vanadium.avo
 
 import dev.vanadium.avo.error.BaseError
-import dev.vanadium.avo.error.RuntimeError
-import dev.vanadium.avo.error.SourceError
 import dev.vanadium.avo.error.handler.ErrorHandlingConfig
 import dev.vanadium.avo.module.ModuleLoader
 import dev.vanadium.avo.module.SourceScanner
 import dev.vanadium.avo.runtime.internal.InternalFunctionLoader
 import dev.vanadium.avo.runtime.interpreter.Runtime
-import dev.vanadium.avo.runtime.types.symbol.Function
 import dev.vanadium.avo.syntax.ast.ExpressionCallNode
 import dev.vanadium.avo.syntax.ast.SymbolReferenceNode
+import dev.vanadium.avo.syntax.lexer.Token
+import dev.vanadium.avo.syntax.lexer.TokenType
 import java.io.File
 
 class AvoInterpreter(
@@ -38,19 +37,32 @@ class AvoInterpreter(
     private fun run() {
         loader.loadAllModules()
         val main = loader.findMainModule()
-        val mainFunction = main.findMainFunctionDefinition()
 
-        // Run the main module to generate function definitions (among other things)
+        // Resolve Imports
+        main.module.imports.forEach { import ->
+            // TODO Circular Dependency Check, Etc.
+            val module = loader.findModule(import.identifier.value, main)
+            val moduleRuntime = Runtime(functionLoader)
+            moduleRuntime.runModule(module.module)
+            runtime.scope.defineNamespace(
+                module.module.name,
+                moduleRuntime.scope,
+                import.line
+            )
+        }
+
         runtime.runModule(main.module)
 
         // Call the main function
-        runtime.evaluate(ExpressionCallNode(
-            mainFunction.line,
-            SymbolReferenceNode(
-                mainFunction.line,
-                mainFunction.identifier
-            ),
-            listOf()
-        ))
+        runtime.evaluate(
+            ExpressionCallNode(
+                0,
+                SymbolReferenceNode(
+                    0,
+                    Token("main", TokenType.IDENTIFIER, 0)
+                ),
+                listOf()
+            )
+        )
     }
 }

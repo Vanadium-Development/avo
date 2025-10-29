@@ -1,0 +1,9 @@
+module io
+
+fun println(s: string) {
+    internal println(s)
+}
+
+fun print(s: string) {
+    internal print(s)
+}

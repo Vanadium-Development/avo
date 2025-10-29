@@ -16,8 +16,8 @@ class VariableDeclarationInterpreter(runtime: Runtime) :
         DataType.IntegerType                 -> IntegerValue.defaultValue()
         DataType.StringType                  -> StringValue.defaultValue()
         DataType.BooleanType                 -> BooleanValue.defaultValue()
-        DataType.FloatType                   -> FloatValue.defaultValue()
-        DataType.ModuleType                  -> throw RuntimeError(
+        DataType.FloatType     -> FloatValue.defaultValue()
+        DataType.NamespaceType -> throw RuntimeError(
             "Module variable must be assigned upon declaration",
             line
         )

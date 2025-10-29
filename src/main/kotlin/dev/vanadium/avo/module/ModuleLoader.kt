@@ -1,7 +1,6 @@
 package dev.vanadium.avo.module
 
 import dev.vanadium.avo.error.SourceError
-import dev.vanadium.avo.runtime.types.symbol.Module
 import dev.vanadium.avo.syntax.lexer.Lexer
 import dev.vanadium.avo.syntax.parser.Parser
 
@@ -30,4 +29,15 @@ class ModuleLoader(val sourceScanner: SourceScanner) {
             "Tree"
         )
     }
+
+    fun findModule(
+        name: String,
+        importingModule: Module
+    ): Module {
+        return modules[name] ?: throw SourceError(
+            "Undefined module: $name",
+            importingModule.path.name
+        )
+    }
+
 }

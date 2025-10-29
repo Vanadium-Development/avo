@@ -1,4 +1,4 @@
-package dev.vanadium.avo.runtime.types.symbol
+package dev.vanadium.avo.module
 
 import dev.vanadium.avo.error.SourceError
 import dev.vanadium.avo.runtime.types.DataType

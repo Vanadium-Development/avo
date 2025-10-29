@@ -24,7 +24,7 @@ class Parser(lexer: Lexer) {
             val node = parseAny()
 
             if (node !is FunctionDefinitionNode && node !is VariableDeclarationNode && node !is ModuleDefinitionNode
-                && node !is ComplexTypeDefinitionNode)
+                && node !is ModuleImportNode && node !is ComplexTypeDefinitionNode)
                 throw SyntaxError(
                     "Unexpected $node",
                     currentLine

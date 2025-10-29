@@ -4,6 +4,7 @@ import dev.vanadium.avo.error.RuntimeError
 import dev.vanadium.avo.runtime.types.ComplexType
 import dev.vanadium.avo.runtime.types.DataType
 import dev.vanadium.avo.runtime.types.symbol.Function
+import dev.vanadium.avo.runtime.types.symbol.Namespace
 import dev.vanadium.avo.runtime.types.symbol.Symbol
 import dev.vanadium.avo.runtime.types.symbol.Variable
 import dev.vanadium.avo.runtime.types.value.RuntimeValue
@@ -25,13 +26,13 @@ data class Scope(
     /**
      * Check whether a given symbol identifier is already used in the current scope.
      */
-    private fun isSymbolIdentifierTaken(identifier: String) =
+    fun isSymbolIdentifierTaken(identifier: String) =
         symbols.containsKey(identifier)
 
     /**
      * Check whether a given complex type  identifier is already used in the current scope.
      */
-    private fun isComplexTypeIdentifierTaken(identifier: String) =
+    fun isComplexTypeIdentifierTaken(identifier: String) =
         complexTypes.containsKey(identifier)
 
     /**
@@ -53,7 +54,7 @@ data class Scope(
 
         listOf(type).validateTypes(line)
 
-        symbols[identifier] = Variable(this, expression, type)
+        symbols[identifier] = Variable(identifier, this, expression, type)
     }
 
     /**
@@ -243,4 +244,26 @@ data class Scope(
 
         return true
     }
+
+    /**
+     * Defines a namespace for a given scope.
+     * This is used for declaring imported modules
+     */
+    fun defineNamespace(
+        identifier: String,
+        scope: Scope,
+        line: Int
+    ) {
+        if (isSymbolIdentifierTaken(identifier))
+            throw RuntimeError(
+                "Cannot define namespace: Identifier \"$identifier\" is already in use",
+                line
+            )
+
+        symbols[identifier] = Namespace(
+            identifier,
+            scope
+        )
+    }
+
 }

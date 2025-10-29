@@ -43,8 +43,8 @@ sealed class DataType : KTypeMappable {
         override fun toKType(): KType = Unit::class.createType()
     }
 
-    object ModuleType : DataType() {
-        override fun toString() = "module"
+    object NamespaceType : DataType() {
+        override fun toString() = "namespace"
         override fun toKType(): KType {
             throw RuntimeError("${this.javaClass.simpleName} cannot be mapped to a kotlin type", 0)
         }

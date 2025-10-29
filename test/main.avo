@@ -1,4 +1,5 @@
 module main
+import io
 
 complex Pixel {
     r: int,
@@ -68,4 +69,5 @@ var img = createImage(width, height, fun (x: int, y: int) -> Pixel {
 
 fun main() {
     writeImage(img)
+    io.print("Hello, World!")
 }

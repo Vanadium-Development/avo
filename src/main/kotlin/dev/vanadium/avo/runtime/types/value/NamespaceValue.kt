@@ -1,16 +1,16 @@
 package dev.vanadium.avo.runtime.types.value
 
 import dev.vanadium.avo.error.RuntimeError
-import dev.vanadium.avo.syntax.ast.ModuleNode
+import dev.vanadium.avo.runtime.types.symbol.Namespace
 
-class ModuleValue(
-    val module: ModuleNode
+class NamespaceValue(
+    val namespace: Namespace
 ) : RuntimeValue() {
     override fun plus(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a mathematical operation",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -18,7 +18,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a mathematical operation",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -26,7 +26,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a mathematical operation",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -34,7 +34,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a mathematical operation",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -42,7 +42,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a mathematical operation",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -50,7 +50,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a mathematical operation",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -58,7 +58,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a comparison",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -66,7 +66,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a comparison",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -74,7 +74,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a comparison",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -82,7 +82,7 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a comparison",
+        "Cannot perform operations on a namespace",
         line
     )
 
@@ -90,11 +90,11 @@ class ModuleValue(
         other: RuntimeValue,
         line: Int
     ): RuntimeValue = throw RuntimeError(
-        "A Module cannot be part of a comparison",
+        "Cannot perform operations on a namespace",
         line
     )
 
     override fun isNumeric(): Boolean = false
 
-    override fun name(): String = "Module"
+    override fun name(): String = "Namespace"
 }
