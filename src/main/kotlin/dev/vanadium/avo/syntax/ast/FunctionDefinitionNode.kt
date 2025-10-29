@@ -18,16 +18,5 @@ data class FunctionDefinitionNode(
         val type: DataType
     )
 
-    fun noParameterCall(): ExpressionCallNode? {
-        if (parameters.isNotEmpty())
-            return null
-
-        return ExpressionCallNode(
-            line,
-            SymbolReferenceNode(line, identifier),
-            listOf()
-        )
-    }
-
     override fun toString(): String = "Function Definition"
 }
